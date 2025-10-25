@@ -27,4 +27,34 @@ public class Staff extends User {
     public String getUserType() {
         return "Staff";
     }
+
+    // Staff class methods
+    public void authoriseCompanyRepAcc(CompanyRepresentative rep) {
+        rep.setApproved(true);
+    }
+
+    public void rejectCompanyRepAcc(CompanyRepresentative rep) {
+        rep.setApproved(false);
+    }
+
+    public void approveListing(Internship internListing) {
+        internListing.updateStatus(InternshipStatus.APPROVED);
+    }
+
+    public void rejectListing(Internship internListing) {
+        internListing.updateStatus(InternshipStatus.REJECTED);
+    }
+
+    public void approveStudentWithdrawal(Application app) {
+        app.updateStatus(ApplicationStatus.WITHDRAWN);
+    }
+
+    public void rejectStudentWithdrawal(Application app) {
+        app.updateStatus(ApplicationStatus.REJECTED);
+    }
+
+    public Report generateReport(String criteria) {
+        // placeholder: report generation logic will aggregate and filter data
+        return new Report(criteria);
+    }
 }
