@@ -14,12 +14,9 @@ public class Internship {
     private boolean visible; // toggled by company rep
     private int numSlots; // total slots
     private int filledSlots; // how many confirmed
-    private InternshipStatus status; // enum instead of String
+    private InternshipStatus status; // enum
     private ArrayList<Application> applications;
 
-    /**
-     * Constructor for a new internship. Default status is PENDING.
-     */
     public Internship(String title, String description, String level, String major,
                       LocalDate open, LocalDate close, String company,
                       CompanyRep creator, int slots) {
@@ -63,14 +60,12 @@ public class Internship {
             visible = !visible;
     }
 
-    // Logic checks
     public boolean isOpen() {
         LocalDate now = LocalDate.now();
         return isVisible() && !now.isBefore(openDate) && !now.isAfter(closeDate)
                 && status == InternshipStatus.APPROVED;
     }
 
-    // Application handling
     public void addApplication(Application app) {
         applications.add(app);
         updateFilledSlots();
