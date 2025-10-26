@@ -13,7 +13,6 @@ public class Internship {
     private CompanyRep creator; // who created it
     private boolean visible; // toggled by company rep
     private int numSlots; // total slots
-    private int filledSlots; // how many confirmed
     private InternshipStatus status; // enum
     private ArrayList<Application> applications;
 
@@ -29,7 +28,6 @@ public class Internship {
         this.companyName = company;
         this.creator = creator;
         this.numSlots = slots;
-        this.filledSlots = 0;
         this.visible = false; // hidden until approved
         this.status = InternshipStatus.PENDING;
         this.applications = new ArrayList<>();
