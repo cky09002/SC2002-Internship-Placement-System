@@ -1,3 +1,5 @@
+package model;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -36,17 +38,49 @@ public class Internship {
     }
 
     // Getters
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public String getLevel() { return level; }
-    public String getPreferredMajor() { return preferredMajor; }
-    public String getCompanyName() { return companyName; }
-    public CompanyRep getCreator() { return creator; }
-    public InternshipStatus getStatus() { return status; }
-    public boolean isVisible() { return visible && status == InternshipStatus.APPROVED; }
-    public int getNumSlots() { return numSlots; }
-    public int getFilledSlots() { return filledSlots; }
-    public ArrayList<Application> getApplications() { return applications; }
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public String getPreferredMajor() {
+        return preferredMajor;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public CompanyRep getCreator() {
+        return creator;
+    }
+
+    public InternshipStatus getStatus() {
+        return status;
+    }
+
+    public boolean isVisible() {
+        return visible && status == InternshipStatus.APPROVED;
+    }
+
+    public int getNumSlots() {
+        return numSlots;
+    }
+
+    public int getFilledSlots() {
+        return filledSlots;
+    }
+
+    public ArrayList<Application> getApplications() {
+        return applications;
+    }
 
     // Status and visibility control
     public void setStatus(InternshipStatus status) {
@@ -81,3 +115,4 @@ public class Internship {
     private void updateFilledSlots() {
         if (filledSlots >= numSlots) status = InternshipStatus.FILLED;
     }
+}
