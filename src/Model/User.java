@@ -1,4 +1,4 @@
-package Assignment;
+package Model;
 
 public abstract class User {
     private String userID;
