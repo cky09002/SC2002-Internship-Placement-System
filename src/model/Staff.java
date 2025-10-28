@@ -1,4 +1,4 @@
-package Assignment;
+package model;
 
 public class Staff extends User {
     private String staffDepartment;

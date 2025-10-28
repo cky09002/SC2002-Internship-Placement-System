@@ -1,4 +1,4 @@
-package Assignment;
+package model;
 
 public class CompanyRepresentative extends User {
     private String companyName;

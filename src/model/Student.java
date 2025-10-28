@@ -30,6 +30,10 @@ public class Student extends User {
     public void setMajor(String major) { this.major = major; }
     public List<Application> getApplications() { return applications; }
 
+    public void logout() {
+        setLoggedIn(false);
+    }
+
     public Application findApplicationWithID(int applicationID) {
         return applications.stream()
                 .filter((a) -> a.getId() == applicationID)
@@ -59,13 +63,17 @@ public class Student extends User {
     public void acceptApplication(Application app) {
         // check that chosen application is successful
         if (app.getStatus() != ApplicationStatus.SUCCESSFUL) {
-            throw new WrongApplicationStatusException(app.getStatus().toString(), ApplicationStatus.SUCCESSFUL.toString());
+            throw new WrongApplicationStatusException(app.getStatus());
         }
 
-        app.accept();
+        app.setStatus(ApplicationStatus.CONFIRMED);
+        applications.stream()
+                .filter((a) -> a != app)
+                .forEach((a) -> a.setStatus(ApplicationStatus.WITHDRAWN));
     }
 
     public void withdrawApplication(Application app) {
+        // TODO: needs a way to mark an application for withdrawal
         app.requestWithdrawal();
     }
 }

@@ -8,9 +8,9 @@ public class Application {
     private static int nextID = 500000;
 
     private final int id;
-    private Internship internship;
-    private Student applicant;
-    private LocalDateTime dateApplied;
+    private final Internship internship;
+    private final Student applicant;
+    private final LocalDateTime dateApplied;
     private ApplicationStatus status;
 
     public Application(Internship internship, Student applicant, LocalDateTime dateApplied) {
@@ -24,4 +24,6 @@ public class Application {
     public ApplicationStatus getStatus() { return status; }
     public Student getApplicant() { return applicant; }
     public Internship getInternship() { return internship; }
+
+    public void setStatus(ApplicationStatus status) { this.status = status; }
 }

@@ -1,7 +1,9 @@
 package exceptions;
 
+import constant.ApplicationStatus;
+
 public class WrongApplicationStatusException extends RuntimeException {
-    public WrongApplicationStatusException(String curStatus, String reqStatus) {
-        super(String.format("Application is %s when it should be %s", curStatus, reqStatus));
+    public WrongApplicationStatusException(ApplicationStatus curStatus) {
+        super(String.format("Application is %s, needs to be %s to be accepted.", curStatus, ApplicationStatus.SUCCESSFUL));
     }
 }

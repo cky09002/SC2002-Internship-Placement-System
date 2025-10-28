@@ -11,7 +11,6 @@ import java.util.Map;
 public class StudentController {
     private final StudentView view;
     private final Student student;
-    private boolean shouldLogout;
 
     // preset menu option mappings
     private final Map<String, MenuOption> mainMenuOptions = Map.of(
@@ -40,7 +39,6 @@ public class StudentController {
     public StudentController(Student student, StudentView view) {
         this.student = student;
         this.view = view;
-        shouldLogout = false;
     }
 
     public void run() {
@@ -50,12 +48,11 @@ public class StudentController {
 
             // choose what to do next using preset main menu options
             menuSel.getOnSelCallback().run();
-        } while (!shouldLogout);
+        } while (student.isLoggedIn());
     }
 
-    // TODO: should move to User base class
     public void logout() {
-        shouldLogout = true;
+        student.logout();
     }
 
     public void listInternships() {

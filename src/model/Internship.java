@@ -1,10 +1,16 @@
 package model;
 
+import constant.InternshipStatus;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Internship {
 
+    private static final List<Internship> internships = new ArrayList<>();
+
+    private final int id;
     private String title;
     private String description;
     private String level; // Basic, Intermediate, Advanced
@@ -12,7 +18,7 @@ public class Internship {
     private LocalDate openDate;
     private LocalDate closeDate;
     private String companyName;
-    private CompanyRep creator; // who created it
+    private CompanyRepresentative creator; // who created it
     private boolean visible; // toggled by company rep
     private int numSlots; // total slots
     private int filledSlots;//how many slots confirmed
@@ -21,7 +27,7 @@ public class Internship {
 
     public Internship(String title, String description, String level, String major,
                       LocalDate open, LocalDate close, String company,
-                      CompanyRep creator, int slots) {
+                      CompanyRepresentative creator, int slots) {
         this.title = title;
         this.description = description;
         this.level = level;
@@ -58,7 +64,7 @@ public class Internship {
         return companyName;
     }
 
-    public CompanyRep getCreator() {
+    public CompanyRepresentative getCreator() {
         return creator;
     }
 
