@@ -1,6 +1,6 @@
 package View;
 
-import Model.*;
+import model.*;
 import java.util.List;
 import java.util.Scanner;
 
