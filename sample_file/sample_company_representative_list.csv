@@ -1,1 +1,3 @@
-CompanyRepID,Name,CompanyName,Department,Position,Email,Status
+CompanyRepID,Name,CompanyName,Department,Position,Email,Password,Status
+Kchong042@e.ntu.edu.sg,Chong Kok Yang,Facebook,Algorityhm,Tech head,Kchong042@e.ntu.edu.sg,password,Approved
+1,1,1,1,1,1,1,Pending

@@ -1,4 +1,4 @@
-package model;
+package Assignment.src.model;
 
 public class Staff extends User {
     private String staffDepartment;
@@ -8,14 +8,8 @@ public class Staff extends User {
         this.staffDepartment = staffDepartment;
     }
 
-    // Getter for staffDepartment
     public String getStaffDepartment() {
         return staffDepartment;
-    }
-
-    // Setter for staffDepartment
-    public void setStaffDepartment(String staffDepartment) {
-        this.staffDepartment = staffDepartment;
     }
 
     @Override

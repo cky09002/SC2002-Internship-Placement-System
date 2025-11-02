@@ -1,6 +1,6 @@
-package exceptions;
+package Assignment.src.exceptions;
 
-import constant.ApplicationStatus;
+import Assignment.src.constant.ApplicationStatus;
 
 public class WrongApplicationStatusException extends RuntimeException {
     public WrongApplicationStatusException(ApplicationStatus curStatus) {

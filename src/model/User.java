@@ -1,4 +1,4 @@
-package model;
+package Assignment.src.model;
 
 public abstract class User {
     private String userID;
@@ -22,19 +22,21 @@ public abstract class User {
     protected String getPassword() { return password; } // protected in case subclasses need it
     public boolean isLoggedIn() { return loggedIn; }
 
-    // setters (accept values)
-    public void setUserID(String userID) { this.userID = userID; }
-    public void setName(String name) { this.name = name; }
-    public void setEmail(String email){this.email = email; }
-
-    // package-private helpers for controller (keeps business logic out of model)
-    void setLoggedIn(boolean loggedIn) { this.loggedIn = loggedIn; }
-    boolean verifyPassword(String pw) { return pw != null && pw.equals(this.password); }
-    void setPasswordInternal(String newPassword) { this.password = newPassword; }
+    // Control login state and password verification
+    public void setLoggedIn(boolean loggedIn) { this.loggedIn = loggedIn; }
+    public boolean verifyPassword(String pw) { return pw != null && pw.equals(this.password); }
+    
+    public void changePassword(String oldPassword, String newPassword) {
+        if (!verifyPassword(oldPassword)) {
+            throw new IllegalArgumentException("Incorrect old password.");
+        }
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("New password cannot be empty.");
+        }
+        this.password = newPassword;
+    }
 
     // abstract methods to be implemented by subclasses
     public abstract void displayProfile();
     public abstract String getUserType();
-
-
 }

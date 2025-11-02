@@ -1,0 +1,2 @@
+InternshipID,Title,Description,Level,Major,OpenDate,CloseDate,Company,CreatorID,Visible,NumSlots,FilledSlots,Status
+100000,Software Engineer,SGD 1500,Basic,Computer Science,2025-11-02,2025-12-02,Facebook,Kchong042@e.ntu.edu.sg,true,10,0,APPROVED

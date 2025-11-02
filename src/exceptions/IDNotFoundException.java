@@ -1,4 +1,4 @@
-package exceptions;
+package Assignment.src.exceptions;
 
 public class IDNotFoundException extends RuntimeException {
     public IDNotFoundException(String type, int id) {

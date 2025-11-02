@@ -1,4 +1,4 @@
-package Assignment.Constant;
+package Assignment.src.constant;
 
 public enum UserType {
     STUDENT,

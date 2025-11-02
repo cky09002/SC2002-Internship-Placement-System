@@ -1,24 +1,30 @@
-package model;
+package Assignment.src.model;
+
+import Assignment.src.constant.StaffApprovalStatus;
 
 public class CompanyRepresentative extends User {
     private String companyName;
     private String department;
     private String position;
-    private boolean isApproved; // Declared here
+    private StaffApprovalStatus approvalStatus;
 
-    // Constructor - adjusted based on your UserFactory and the CSV parsing
-    public CompanyRepresentative(String userID, String name, String password,String email,
+    public CompanyRepresentative(String userID, String name, String password, String email,
                                  String companyName, String department, String position, String statusFromCsv) {
-        super(userID, name, password,email); // Assuming User constructor only takes ID, Name, Password
+        super(userID, name, password, email);
         this.companyName = companyName;
         this.department = department;
         this.position = position;
-        // The 'isApproved' flag is derived from the 'statusFromCsv'
-        this.isApproved = "Approved".equalsIgnoreCase(statusFromCsv);
-        // We don't need to store the 'statusFromCsv' string if 'isApproved' is the functional flag
+        this.approvalStatus = parseStatusFromCsv(statusFromCsv);
     }
-
-    // --- Getters ---
+    
+    private StaffApprovalStatus parseStatusFromCsv(String status) {
+        if (status == null) return StaffApprovalStatus.PENDING;
+        if (status.equalsIgnoreCase("Approved")) return StaffApprovalStatus.APPROVED;
+        if (status.equalsIgnoreCase("Rejected")) return StaffApprovalStatus.REJECTED;
+        if (status.equalsIgnoreCase("Pending")) return StaffApprovalStatus.PENDING;
+        return StaffApprovalStatus.PENDING;
+    }
+    
     public String getCompanyName() {
         return companyName;
     }
@@ -31,33 +37,37 @@ public class CompanyRepresentative extends User {
         return position;
     }
 
-    // Getter for approval status
     public boolean isApproved() {
-        return isApproved;
+        return approvalStatus == StaffApprovalStatus.APPROVED;
+    }
+    
+    public StaffApprovalStatus getApprovalStatus() {
+        return approvalStatus;
     }
 
-    // You might also want a getter for the descriptive status
     public String getApprovalStatusDescription() {
-        return isApproved ? "Approved" : "Pending Approval"; // Or "Rejected" if you handle it
+        switch(approvalStatus) {
+            case APPROVED: return "Approved";
+            case REJECTED: return "Rejected";
+            default: return "Pending Approval";
+        }
     }
-
-
-    // --- Setters ---
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    
+    public void setApprovalStatus(StaffApprovalStatus status) {
+        this.approvalStatus = status;
     }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
-    // Setter for the approval status (likely used by CareerCenterStaff)
+    
+    // Legacy method for backwards compatibility
     public void setApproved(boolean approved) {
-        isApproved = approved;
+        this.approvalStatus = approved ? StaffApprovalStatus.APPROVED : StaffApprovalStatus.PENDING;
+    }
+    
+    public String getStatusStringForCsv() {
+        switch(approvalStatus) {
+            case APPROVED: return "Approved";
+            case REJECTED: return "Rejected";
+            default: return "Pending";
+        }
     }
 
     @Override
@@ -68,11 +78,21 @@ public class CompanyRepresentative extends User {
                            " | Dept: " + department +
                            " | Position: " + position +
                            " | Email: " + getEmail() +
-                           " | Status: " + getApprovalStatusDescription()); // Use the descriptive getter
+                           " | Status: " + getApprovalStatusDescription());
+    }
+
+    public void logout() {
+        setLoggedIn(false);
     }
 
     @Override
     public String getUserType() {
         return "CompanyRepresentative";
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ID: %s | Name: %s | Company: %s | Department: %s | Position: %s | Email: %s | Status: %s",
+                getUserID(), getName(), companyName, department, position, getEmail(), getApprovalStatusDescription());
     }
 }

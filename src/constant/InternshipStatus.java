@@ -1,4 +1,4 @@
-package constant;
+package Assignment.src.constant;
 
 public enum InternshipStatus {
   PENDING,

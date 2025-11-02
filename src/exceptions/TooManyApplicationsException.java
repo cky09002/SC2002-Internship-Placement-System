@@ -1,4 +1,4 @@
-package exceptions;
+package Assignment.src.exceptions;
 
 public class TooManyApplicationsException extends RuntimeException {
     public TooManyApplicationsException(int max) {

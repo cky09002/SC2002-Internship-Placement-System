@@ -1,6 +1,6 @@
-package model;
+package Assignment.src.model;
 
-import constant.InternshipStatus;
+import Assignment.src.constant.InternshipStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,6 +9,11 @@ import java.util.List;
 public class Internship {
 
     private static final List<Internship> internships = new ArrayList<>();
+    private static int nextID = 100000;
+
+    public static List<Internship> getAllInternships() {
+        return new ArrayList<>(internships);
+    }
 
     private final int id;
     private String title;
@@ -28,19 +33,9 @@ public class Internship {
     public Internship(String title, String description, String level, String major,
                       LocalDate open, LocalDate close, String company,
                       CompanyRepresentative creator, int slots) {
-        this.title = title;
-        this.description = description;
-        this.level = level;
-        this.preferredMajor = major;
-        this.openDate = open;
-        this.closeDate = close;
-        this.companyName = company;
-        this.creator = creator;
-        this.numSlots = slots;
-        this.filledSlots = 0;
-        this.visible = false; // hidden until approved
-        this.status = InternshipStatus.PENDING;
-        this.applications = new ArrayList<>();
+        this(nextID++, title, description, level, major, open, close, company, creator, slots,
+             false, InternshipStatus.PENDING, 0);
+        internships.add(this);
     }
 
     // Getters
@@ -59,6 +54,14 @@ public class Internship {
     public String getPreferredMajor() {
         return preferredMajor;
     }
+    
+    public LocalDate getOpenDate() {
+        return openDate;
+    }
+    
+    public LocalDate getCloseDate() {
+        return closeDate;
+    }
 
     public String getCompanyName() {
         return companyName;
@@ -74,6 +77,44 @@ public class Internship {
 
     public boolean isVisible() {
         return visible && status == InternshipStatus.APPROVED;
+    }
+    
+    public boolean isVisibleToStudent(Student student) {
+        if (!isVisible()) return false;
+        
+        // Check major match
+        if (!preferredMajor.equalsIgnoreCase(student.getMajor())) {
+            return false;
+        }
+        
+        // Check level eligibility based on year of study
+        int year = student.getYearOfStudy();
+        if (level.equalsIgnoreCase("Intermediate") && year < 2) {
+            return false;
+        }
+        if (level.equalsIgnoreCase("Advanced") && year < 3) {
+            return false;
+        }
+        
+        // Check if internship is open (within date range)
+        LocalDate now = LocalDate.now();
+        return !now.isBefore(openDate) && !now.isAfter(closeDate);
+    }
+    
+    public boolean isEligibleForStudent(Student student) {
+        return isVisibleToStudent(student);
+    }
+    
+    public void toggleVisibility() {
+        if (status == InternshipStatus.APPROVED) {
+            visible = !visible;
+            // Save to CSV
+            Assignment.src.utils.InternshipCsvHandler.saveToCsv(this);
+        }
+    }
+    
+    public boolean canEdit() {
+        return status == InternshipStatus.PENDING;
     }
 
     public int getNumSlots() {
@@ -93,17 +134,8 @@ public class Internship {
         this.status = status;
         if (status == InternshipStatus.APPROVED) visible = true;
         if (status == InternshipStatus.REJECTED) visible = false;
-    }
-
-    public void toggleVisibility() {
-        if (status == InternshipStatus.APPROVED)
-            visible = !visible;
-    }
-
-    public boolean isOpen() {
-        LocalDate now = LocalDate.now();
-        return isVisible() && !now.isBefore(openDate) && !now.isAfter(closeDate)
-                && status == InternshipStatus.APPROVED;
+        // Save to CSV
+        Assignment.src.utils.InternshipCsvHandler.saveToCsv(this);
     }
 
     public void addApplication(Application app) {
@@ -111,14 +143,114 @@ public class Internship {
         updateFilledSlots();
     }
 
-    public void confirmPlacement() {
-        if (filledSlots < numSlots) {
-            filledSlots++;
-            updateFilledSlots();
+    private void updateFilledSlots() {
+        long confirmedCount = applications.stream()
+                .filter(app -> app.getStatus() == Assignment.src.constant.ApplicationStatus.CONFIRMED)
+                .count();
+        filledSlots = (int) confirmedCount;
+        if (filledSlots >= numSlots) {
+            status = InternshipStatus.FILLED;
         }
     }
 
-    private void updateFilledSlots() {
-        if (filledSlots >= numSlots) status = InternshipStatus.FILLED;
+    public int getID() {
+        return id;
+    }
+
+    public static Internship findWithID(int id) {
+        return internships.stream()
+                .filter(i -> i.id == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void updateDetails(String title, String description, String level, String major, 
+                             LocalDate openDate, LocalDate closeDate, int slots) {
+        if (!canEdit()) {
+            throw new IllegalStateException("Cannot edit approved internship.");
+        }
+        this.title = title;
+        this.description = description;
+        this.level = level;
+        this.preferredMajor = major;
+        this.openDate = openDate;
+        this.closeDate = closeDate;
+        this.numSlots = slots;
+        // Save to CSV
+        Assignment.src.utils.InternshipCsvHandler.saveToCsv(this);
+    }
+    
+    public void delete() {
+        if (!canEdit()) {
+            throw new IllegalStateException("Cannot delete approved internship.");
+        }
+        internships.remove(this);
+        // TODO: Handle CSV deletion if needed
+    }
+    
+    public void confirmPlacement() {
+        updateFilledSlots();
+        // Save to CSV
+        Assignment.src.utils.InternshipCsvHandler.saveToCsv(this);
+    }
+    
+    public boolean isOwnedBy(CompanyRepresentative rep) {
+        return creator.equals(rep);
+    }
+    
+    public boolean canViewDetails(CompanyRepresentative rep) {
+        return isOwnedBy(rep);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ID: %d | Title: %s | Company: %s | Level: %s | Major: %s | Status: %s | Visible: %s | Slots: %d/%d",
+                id, title, companyName, level, preferredMajor, status, isVisible(), filledSlots, numSlots);
+    }
+    
+    // Public helper methods for CSV handler
+    public static List<Internship> getInternshipsList() {
+        return internships;
+    }
+    
+    public static int getNextID() {
+        return nextID;
+    }
+    
+    public static void setNextID(int id) {
+        nextID = id;
+    }
+    
+    // Public factory method for CSV loading
+    public static Internship createForCsv(int id, String title, String description, String level, String major,
+                                   LocalDate openDate, LocalDate closeDate, String company,
+                                   CompanyRepresentative creator, int numSlots, boolean visible,
+                                   InternshipStatus status, int filledSlots) {
+        return new Internship(id, title, description, level, major, openDate, closeDate, company, creator, numSlots,
+                             visible, status, filledSlots);
+    }
+    
+    private Internship(int id, String title, String description, String level, String major,
+                      LocalDate open, LocalDate close, String company, CompanyRepresentative creator,
+                      int slots, boolean visible, InternshipStatus status, int filledSlots) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.level = level;
+        this.preferredMajor = major;
+        this.openDate = open;
+        this.closeDate = close;
+        this.companyName = company;
+        this.creator = creator;
+        this.numSlots = slots;
+        this.visible = visible;
+        this.status = status;
+        this.filledSlots = filledSlots;
+        this.applications = new ArrayList<>();
+    }
+    
+    // Public getter for CSV handler
+    public boolean isVisiblePrivate() {
+        return visible;
     }
 }
