@@ -528,6 +528,245 @@ end
 
 ---
 
+## Test Cases
+
+This section documents all test cases for the Internship Placement System, including expected behavior and failure scenarios.
+
+---
+
+### Test Case 1: Valid User Login
+
+**Expected Behavior:**  
+User should be able to access their dashboard based on their roles.
+
+**Failure Scenarios:**
+- User cannot log in
+- User receives incorrect error messages
+
+**Related Sequence Diagram:** Section 1
+
+---
+
+### Test Case 2: Invalid ID
+
+**Expected Behavior:**  
+User receives a notification about incorrect ID.
+
+**Failure Scenarios:**
+- User is allowed to log in with an invalid ID
+- System fails to provide meaningful error message
+
+**Related Sequence Diagram:** Section 1
+
+---
+
+### Test Case 3: Incorrect Password
+
+**Expected Behavior:**  
+System should deny access and alert the user to incorrect password.
+
+**Failure Scenarios:**
+- User logs in successfully with a wrong password
+- System fails to provide meaningful error message
+
+**Related Sequence Diagram:** Section 1
+
+---
+
+### Test Case 4: Password Change Functionality
+
+**Expected Behavior:**  
+System updates password, prompts re-login and allows login with new credentials.
+
+**Failure Scenarios:**
+- System does not update the password
+- System denies access with the new password
+
+**Related Sequence Diagram:** Section 2
+
+---
+
+### Test Case 5: Company Representative Account Creation
+
+**Expected Behavior:**  
+A new Company Representative should only be able to log in to their account after it has been approved by a Career Center Staff.
+
+**Failure Scenarios:**
+- Company Representative staff can log in without any authorization
+
+**Related Sequence Diagram:** Section 3
+
+---
+
+### Test Case 6: Internship Opportunity Visibility Based on User Profile and Toggle
+
+**Expected Behavior:**  
+Internship opportunities are visible to students based on their year of study, major, internship level eligibility, and the visibility setting.
+
+**Failure Scenarios:**
+- Students see internship opportunities not relevant to their profile (wrong major, wrong level for their year)
+- Students see opportunities when visibility is off
+
+**Related Sequence Diagram:** Section 4, Section 9
+
+---
+
+### Test Case 7: Internship Application Eligibility
+
+**Expected Behavior:**  
+Students can only apply for internship opportunities relevant to their profile (correct major preference, appropriate level for their year of study) and when visibility is on.
+
+**Failure Scenarios:**
+- Students can apply for internship opportunities not relevant to their profile (wrong major preference, Basic-level students applying for Intermediate/Advanced opportunities)
+- Students can apply when visibility is off
+
+**Related Sequence Diagram:** Section 5
+
+---
+
+### Test Case 8: Viewing Application Status after Visibility Toggle Off
+
+**Expected Behavior:**  
+Students continue to have access to their application details regardless of internship opportunities' visibility.
+
+**Failure Scenarios:**
+- Application details become inaccessible once visibility is off
+
+**Related Sequence Diagram:** Section 10
+
+---
+
+### Test Case 10: Single Internship Placement Acceptance per Student
+
+**Expected Behavior:**  
+System allows accepting one internship placement and automatically withdraws all other applications once a placement is accepted.
+
+**Failure Scenarios:**
+- Student can accept more than one internship placement
+- Other applications remain active after accepting a placement
+
+**Related Sequence Diagram:** Section 6
+
+---
+
+### Test Case 13: Company Representative Internship Opportunity Creation
+
+**Expected Behavior:**  
+System allows Company Representatives to create internship opportunities only when they meet system requirements.
+
+**Failure Scenarios:**
+- System allows creation of opportunities with invalid data
+- System allows creation that exceeds maximum allowed opportunities per representative
+
+**Related Sequence Diagram:** Section 7
+
+---
+
+### Test Case 14: Internship Opportunity Approval Status
+
+**Expected Behavior:**  
+Company Representatives can view pending, approved, or rejected status updates for their submitted opportunities.
+
+**Failure Scenarios:**
+- Status updates are not visible
+- Status updates are incorrect
+- Status updates are not properly saved in the system
+
+**Related Sequence Diagram:** Section 8
+
+---
+
+### Test Case 15: Internship Detail Access for Company Representative
+
+**Expected Behavior:**  
+Company Representatives can always access full details of internship opportunities they created, regardless of visibility setting.
+
+**Failure Scenarios:**
+- Opportunity details become inaccessible when visibility is toggled off for their own opportunities
+
+**Related Sequence Diagram:** Section 9
+
+---
+
+### Test Case 16: Restriction on Editing Approved Opportunities
+
+**Expected Behavior:**  
+Edit functionality is restricted for Company Representatives once internship opportunities are approved by Career Center Staff.
+
+**Failure Scenarios:**
+- Company Representatives are able to make changes to opportunity details after approval
+
+**Related Sequence Diagram:** Section 20
+
+---
+
+### Test Case 18: Student Application Management and Placement Confirmation
+
+**Expected Behavior:**  
+Company Representatives retrieve correct student applications, update slot availability accurately, and correctly confirm placement details.
+
+**Failure Scenarios:**
+- Incorrect application retrieval
+- Slot counts not updating properly
+- Failure to reflect placement confirmation details accurately
+
+**Related Sequence Diagram:** Section 12
+
+---
+
+### Test Case 19: Internship Placement Confirmation Status Update
+
+**Expected Behavior:**  
+Placement confirmation status is updated to reflect the actual confirmation condition.
+
+**Failure Scenarios:**
+- System fails to update the placement confirmation status
+- System incorrectly records the placement confirmation status
+
+**Related Sequence Diagram:** Section 12
+
+---
+
+### Test Case 20: Create, Edit, and Delete Internship Opportunity Listings
+
+**Expected Behavior:**  
+Company Representatives should be able to add new opportunities, modify existing opportunity details (before approval by Career Center Staff), and remove opportunities from the system.
+
+**Failure Scenarios:**
+- Inability to create, edit, or delete opportunities
+- Errors during these operations
+
+**Related Sequence Diagram:** Section 7
+
+---
+
+### Test Case 21: Career Center Staff Internship Opportunity Approval
+
+**Expected Behavior:**  
+Career Center Staff can review and approve/reject internship opportunities submitted by Company Representatives.
+
+**Failure Scenarios:**
+- Career Center Staff cannot access submitted opportunities for review
+- Approval/rejection actions fail to update opportunity status
+- Approved opportunities do not become visible to students as expected
+
+**Related Sequence Diagram:** Section 8
+
+---
+
+### Test Case 22: Toggle Internship Opportunity Visibility
+
+**Expected Behavior:**  
+Changes in visibility should be reflected accurately in the internship opportunity list visible to students.
+
+**Failure Scenarios:**
+- Visibility settings do not update
+- Visibility settings do not affect the opportunity listing as expected
+
+**Related Sequence Diagram:** Section 9
+
+---
+
 ## Summary of Key Design Patterns Used
 
 1. **Singleton Pattern:** `UserRegistry` ensures a single instance for centralized user management
