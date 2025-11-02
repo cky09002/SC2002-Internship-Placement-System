@@ -2,7 +2,6 @@ package Assignment.src.model;
 
 import Assignment.src.constant.ApplicationStatus;
 import Assignment.src.exceptions.IDNotFoundException;
-import Assignment.src.exceptions.TooManyApplicationsException;
 import Assignment.src.exceptions.WrongApplicationStatusException;
 
 import java.time.LocalDateTime;
@@ -37,16 +36,41 @@ public class Student extends User {
                 .orElseThrow(() -> new IDNotFoundException("application", applicationID));
     }
 
-    public Application submitApplication(Internship internship) {
-        // enforce per-student application limit
-        if (applications.size() >= MAX_APPLICATIONS) {
-            throw new TooManyApplicationsException(MAX_APPLICATIONS);
+    private void validateApplication(Internship internship) {
+        // check student has not accepted any offer yet
+        if (applications.stream().anyMatch(app -> app.getStatus() == ApplicationStatus.CONFIRMED)) {
+            throw new IllegalStateException("You have already accepted an internship offer.");
         }
-        
+
+        // check student has not already applied
+        if (applications.stream().anyMatch(app -> app.getApplicant() == this)) {
+            throw new IllegalStateException("You have already applied for this internship.");
+        }
+
+        // check per-student application limit
+        // UNSUCCESSFUL and WITHDRAWN applications don't count towards the limit
+        long numActiveApps = applications.stream()
+                .filter(app -> {
+                    ApplicationStatus status = app.getStatus();
+                    return status != ApplicationStatus.UNSUCCESSFUL &&
+                            status != ApplicationStatus.WITHDRAWN;
+                })
+                .count();
+        if (numActiveApps >= MAX_APPLICATIONS) {
+            throw new IllegalStateException(String.format(
+                    "Application limit reached. Max allowed: %d",
+                    MAX_APPLICATIONS));
+        }
+
         // Check eligibility
         if (!internship.isEligibleForStudent(this)) {
-            throw new IllegalStateException("You are not eligible for this internship. Check your major, year of study, or visibility status.");
+            throw new IllegalStateException(
+                    "You are not eligible for this internship. Check your major, year of study, or visibility status.");
         }
+    }
+
+    public Application submitApplication(Internship internship) {
+        validateApplication(internship);
 
         // create the application object and pass it to associated internship
         Application app = new Application(
