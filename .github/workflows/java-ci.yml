@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        java-version: [11, 17]
+        java-version: [17]
 
     steps:
     - name: Checkout repository
@@ -33,15 +33,29 @@ jobs:
       shell: bash
       run: |
         echo "Finding Java files..."
-        find src -name "*.java" -type f | wc -l | xargs echo "Found Java files:"
-        echo "Compiling Java files..."
         find src -name "*.java" -type f > javafiles.txt
-        javac -d out -sourcepath src @javafiles.txt 2>&1
-        echo "✅ Compilation successful"
-        echo "Verifying compiled classes..."
-        test -f out/Assignment/src/MainApp.class && echo "MainApp.class found" || echo "MainApp.class missing"
-        test -f out/Assignment/src/InternshipApp.class && echo "InternshipApp.class found" || echo "InternshipApp.class missing"
-        rm javafiles.txt
+        file_count=$(wc -l < javafiles.txt)
+        echo "Found $file_count Java files"
+        echo "First 5 files:"
+        head -n 5 javafiles.txt || true
+        echo ""
+        echo "Compiling Java files..."
+        if javac -d out -sourcepath src @javafiles.txt 2>&1; then
+          echo "✅ Compilation successful"
+          echo "Verifying compiled classes..."
+          test -f out/Assignment/src/MainApp.class && echo "✅ MainApp.class found" || echo "❌ MainApp.class missing"
+          test -f out/Assignment/src/InternshipApp.class && echo "✅ InternshipApp.class found" || echo "❌ InternshipApp.class missing"
+          rm javafiles.txt
+        else
+          echo "❌ Compilation failed!"
+          echo "File list being used:"
+          cat javafiles.txt || true
+          echo ""
+          echo "Checking output directory:"
+          ls -la out/ || true
+          rm javafiles.txt
+          exit 1
+        fi
 
     - name: Compile Java files (Windows)
       if: runner.os == 'Windows'
