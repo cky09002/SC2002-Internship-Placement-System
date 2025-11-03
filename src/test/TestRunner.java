@@ -682,7 +682,7 @@ public class TestRunner {
             Internship internship = new Internship("Test", "Desc", "Basic", "CSC", 
                 LocalDate.now(), LocalDate.now().plusDays(30), "Company", rep, 5);
             
-            int initialSlots = internship.getAvailableSlots();
+            int initialSlots = internship.getNumSlots() - internship.getFilledSlots();
             Application app = student.submitApplication(internship);
             
             // Accept application
