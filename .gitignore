@@ -70,8 +70,3 @@ docker-compose.override.yml
 # Documentation and assignment files
 *.pdf
 Assignment.iml
-README.md
-REPORT.md
-*.md
-SEQUENCE_DIAGRAM*.md
-UML_*.md
