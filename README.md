@@ -71,7 +71,7 @@ docker run --rm -it internship-app
 
 ### Option 2: Direct Compilation and Execution
 
-**Prerequisites:** Java Development Kit (JDK) 11 or higher
+**Prerequisites:** Java Development Kit (JDK) 17 or higher
 
 ```bash
 # Clone the repository
@@ -108,7 +108,7 @@ The project includes automated build and test workflows via GitHub Actions. See 
 
 ## 📋 System Requirements
 
-- **Java**: JDK 11 or higher (JDK 17 recommended)
+- **Java**: JDK 17 or higher
 - **Operating System**: Windows, macOS, or Linux
 - **CSV Data Files**: Required in `sample_file/` directory:
   - `sample_student_list.csv`
