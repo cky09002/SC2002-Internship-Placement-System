@@ -107,11 +107,24 @@ jobs:
           java -cp out Assignment.src.MainApp 2>&1 | head -n 10 || echo "Note: MainApp requires CSV files and user input to run fully, but class loading is verified"
         fi
 
+    - name: Verify CSV files exist
+      shell: bash
+      run: |
+        echo "Checking for required CSV files..."
+        ls -la sample_file/ || echo "sample_file/ directory not found"
+        test -f sample_file/sample_student_list.csv && echo "✅ sample_student_list.csv found" || echo "❌ sample_student_list.csv missing"
+        test -f sample_file/sample_staff_list.csv && echo "✅ sample_staff_list.csv found" || echo "❌ sample_staff_list.csv missing"
+        test -f sample_file/sample_company_representative_list.csv && echo "✅ sample_company_representative_list.csv found" || echo "❌ sample_company_representative_list.csv missing"
+        test -f sample_file/sample_internships.csv && echo "✅ sample_internships.csv found" || echo "❌ sample_internships.csv missing"
+        test -f sample_file/sample_applications.csv && echo "✅ sample_applications.csv found" || echo "❌ sample_applications.csv missing"
+        echo "Current working directory: $(pwd)"
+
     - name: Check runtime errors - Run TestRunner
       continue-on-error: true
       shell: bash
       run: |
         echo "Running TestRunner to check for runtime errors..."
+        echo "Working directory: $(pwd)"
         if command -v timeout >/dev/null 2>&1; then
           timeout 30s java -cp out Assignment.src.test.TestRunner 2>&1 | head -n 50 || echo "Note: TestRunner may require CSV files, but runtime errors are checked"
         else
