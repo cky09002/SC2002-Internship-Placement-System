@@ -3,109 +3,117 @@ package Assignment.src.controller;
 import Assignment.src.model.Application;
 import Assignment.src.model.Internship;
 import Assignment.src.model.Student;
-import Assignment.src.view.MenuOption;
-import Assignment.src.view.StudentView;
-import Assignment.src.exceptions.*;
+import Assignment.src.utils.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class StudentController {
-    private final StudentView view;
+public class StudentController extends BaseUserController {
     private final Student student;
 
-    // preset menu option mappings
-    private final Map<String, MenuOption> mainMenuOptions;
-
-    public StudentController(Student student, StudentView view) {
+    public StudentController(Student student) {
+        super(student);
         this.student = student;
-        this.view = view;
-        this.mainMenuOptions = initializeMenuOptions();
-    }
-    
-    private Map<String, MenuOption> initializeMenuOptions() {
-        Map<String, MenuOption> options = new HashMap<>();
-        options.put("l", new MenuOption("list available internships", this::listInternships));
-        options.put("c", new MenuOption("create a new application", this::createApplication));
-        options.put("v", new MenuOption("view my applications", this::viewApplications));
-        options.put("w", new MenuOption("request to withdraw an application", this::withdrawApplication));
-        options.put("a", new MenuOption("accept a successful application", this::acceptApplication));
-        options.put("q", new MenuOption("log out", this::logout));
-        return options;
     }
 
-    public void run() {
-        do {
-            try {
-                // show main menu
-                MenuOption menuSel = view.showMenuDialog(mainMenuOptions);
-
-                // choose what to do next using preset main menu options
-                if (menuSel != null && menuSel.getOnSelCallback() != null) {
-                    menuSel.getOnSelCallback().run();
-                } else {
-                    System.out.println("Invalid menu option!");
-                }
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-        } while (student.isLoggedIn());
-    }
-
-    public void logout() {
-        student.logout();
-    }
-
-    public void listInternships() {
-        List<Internship> eligibleInternships = Internship.getAllInternships().stream()
-                .filter(i -> i.isVisibleToStudent(student))
+    public List<String> listInternships() {
+        // Use filter settings that persist across menu pages
+        List<Internship> internships = getInternships();
+        // Format internships for students (no Status or Visible shown)
+        return internships.stream()
+                .map(i -> InternshipFormatter.formatAsRow(i, false))
                 .collect(java.util.stream.Collectors.toList());
-        view.showInternships(eligibleInternships);
-    }
-
-    public void createApplication() {
-        try {
-            int internshipID = view.showApplyDialog();
-            Internship its = Internship.findWithID(internshipID);
-            if (its == null) {
-                System.out.println("Internship not found!");
-                return;
-            }
-            Application app = student.submitApplication(its);
-            view.showApplyMsg(app);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void withdrawApplication() {
-        try {
-            int applicationID = view.showWithdrawDialog();
-            Application app = student.findApplicationWithID(applicationID);
-            student.withdrawApplication(app);
-            System.out.println("Withdrawal request submitted successfully! It will be reviewed by Career Center Staff.");
-        } catch (IDNotFoundException e) {
-            System.out.println("Error: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void acceptApplication() {
-        try {
-            int applicationID = view.showAcceptDialog();
-            Application app = student.findApplicationWithID(applicationID);
-            student.acceptApplication(app);
-            System.out.println("Application accepted successfully!");
-        } catch (WrongApplicationStatusException | IDNotFoundException e) {
-            System.out.println("Error: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
     }
     
-    public void viewApplications() {
-        view.viewMyApplications(student.getApplications());
+    /**
+     * Get filtered internships visible to student
+     */
+    public List<Internship> getInternships() {
+        return internshipController.getVisibleInternshipsForStudent(student, filterSettings);
+    }
+    
+
+    public String createApplication(int internshipID) {
+        Application app = applicationController.createApplication(internshipID, student, internshipController);
+        if (app == null) {
+            return null;
+        }
+        return ApplicationFormatter.formatDetails(app, "✓ APPLICATION SUBMITTED SUCCESSFULLY", true);
+    }
+
+    public void withdrawApplication(int applicationID, String reason) {
+        applicationController.withdrawApplication(applicationID, student, reason);
+    }
+
+    public void acceptApplication(int applicationID) {
+        applicationController.acceptApplication(applicationID, student);
+    }
+    
+    /**
+     * Reject placement - Student can reject SUCCESSFUL or ACCEPTED applications
+     * Sets status to UNSUCCESSFUL
+     */
+    public void rejectPlacement(int applicationID) {
+        applicationController.rejectPlacement(applicationID, student);
+    }
+    
+    public List<Application> viewApplications() {
+        List<Application> applications = applicationController.getApplicationsForStudent(student);
+        return applications.stream()
+                .sorted((a1, a2) -> Integer.compare(a1.getId(), a2.getId()))
+                .collect(java.util.stream.Collectors.toList());
+    }
+    
+    /**
+     * Get formatted application list as strings (for backward compatibility)
+     */
+    public List<String> viewApplicationsAsStrings() {
+        return viewApplications().stream()
+                .map(app -> ApplicationFormatter.formatAsRow(app))
+                .collect(java.util.stream.Collectors.toList());
+    }
+    
+    /**
+     * Get detailed application information for viewing
+     */
+    public String getApplicationDetails(int applicationID) {
+        Application application = applicationController.findApplicationByID(applicationID, student);
+        return ApplicationFormatter.formatDetails(application, "APPLICATION DETAILS", true);
+    }
+    
+    /**
+     * Get detailed internship information for viewing
+     * Students can view internships they've applied for, even if visibility is turned off
+     * But listings should only show internships that match their profile
+     */
+    public String getInternshipDetails(int internshipID) {
+        Internship internship = internshipController.findInternship(internshipID);
+        
+        // Use canStudentViewDetails which allows viewing applied internships
+        if (!internship.canStudentViewDetails(student)) {
+            throw new IllegalArgumentException("You don't have permission to view this internship!");
+        }
+        
+        return InternshipFormatter.formatDetails(internship, "INTERNSHIP DETAILS", false);
+    }
+    
+    
+    /**
+     * Edit student profile fields
+     */
+    public void editProfile(String name, String email, Integer yearOfStudy, String major) {
+        if (name != null && !name.trim().isEmpty()) {
+            student.setName(name);
+        }
+        if (email != null && !email.trim().isEmpty()) {
+            student.setEmail(email);
+        }
+        if (yearOfStudy != null) {
+            student.setYearOfStudy(yearOfStudy);
+        }
+        if (major != null && !major.trim().isEmpty()) {
+            student.setMajor(major);
+        }
+        // Note: Profile changes are in-memory only, not persisted to CSV
+        // CSV updates would require UserRegistry.saveUserToCsv() method
     }
 }

@@ -1,101 +1,115 @@
 package Assignment.src.view;
 
-import Assignment.src.model.*;
+import Assignment.src.controller.StaffController;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.List;
-import java.util.Scanner;
+public class StaffView extends BaseView {
+    private StaffController controller;
 
-public class StaffView {
-    private Scanner sc = new Scanner(System.in);
-
-    public void displayMenu() {
-        System.out.println();
-        System.out.println("─".repeat(60));
-        System.out.println("  CAREER CENTER STAFF DASHBOARD");
-        System.out.println("─".repeat(60));
-        System.out.println("  1. Approve/Reject Company Representative");
-        System.out.println("  2. Approve/Reject Internship Listing");
-        System.out.println("  3. Approve/Reject Student Withdrawal");
-        System.out.println("  4. Filter Data");
-        System.out.println("  5. Generate Report");
-        System.out.println("  0. Logout");
-        System.out.println("─".repeat(60));
-        System.out.print("  Enter your choice: ");
+    public StaffView(StaffController controller) {
+        super(controller::isLoggedIn);
+        this.controller = controller;
     }
     
-    public int getApplicationID() {
-        System.out.print("  Enter application ID: ");
-        int id = sc.nextInt();
-        sc.nextLine();
-        return id;
-    }
-
-    public String getFilterCriteria() {
-        System.out.print("  Enter filter criteria: ");
-        return sc.nextLine();
+    @Override
+    protected String getInternshipDetailsForFilter(int internshipID) {
+        return controller.getInternshipDetails(internshipID);
     }
     
-    public int getInternshipID() {
-        System.out.print("  Enter internship ID: ");
-        int id = sc.nextInt();
-        sc.nextLine();
-        return id;
+    @Override
+    protected void showInitialInternshipsView() {
+        showInternshipsLoop("INTERNSHIP OPPORTUNITIES",
+            () -> controller.internshipController.getAllInternships(controller.getFilterSettings()),
+            "No internships available.", controller.getFilterSettings(),
+            controller::getInternshipDetails, null, null, true);
+    }
+
+    @Override
+    protected Map<Integer, MenuOption> initializeMenuOptions() {
+        Map<Integer, MenuOption> options = new HashMap<>();
+        options.put(1, new MenuOption("view my profile", this::handleViewProfile));
+        options.put(2, new MenuOption("edit my profile", this::handleEditProfile));
+        options.put(3, new MenuOption("approve/reject company representative", this::handleApproveRejectCompanyRep));
+        options.put(4, new MenuOption("approve/reject internship listing", this::handleApproveRejectInternship));
+        options.put(5, new MenuOption("approve/reject student withdrawal", this::handleApproveRejectWithdrawal));
+        options.put(6, new MenuOption("filter internships", this::handleFilterInternships));
+        options.put(7, new MenuOption("list internship opportunities", this::handleListInternshipOpportunities));
+        options.put(0, new MenuOption("log out", controller::logout));
+        return options;
+    }
+
+    @Override
+    protected String getDashboardTitle() {
+        return "CAREER CENTER STAFF DASHBOARD";
+    }
+
+    @Override
+    protected String getProfileText() {
+        return controller.getProfile();
     }
     
-    public String getCompanyRepID() {
-        System.out.print("  Enter company representative ID: ");
-        return sc.nextLine();
+    @Override
+    protected void editProfileFields() {
+        String[] menu = {"Name", "Email", "Department"};
+        String[] prompts = {"Name", "Email", "Department"};
+        int[] indices = displayMenuAndGetSelection(menu, "  Enter field numbers to edit (comma-separated, e.g., 1,3): ");
+        if (checkEditCancelled(indices)) return;
+        
+        String[] fields = collectFieldValues(indices, prompts, idx -> false); // No integer fields
+        
+        String name = fields[0];
+        String email = fields[1];
+        String department = fields[2];
+        
+        controller.editProfile(name, email, department);
+        System.out.println("\nProfile updated successfully!");
+    }
+
+    private void handleApproveRejectCompanyRep() {
+        handleApproveRejectPattern("COMPANY REPRESENTATIVES", 
+            "No pending company representatives.", 
+            "  Enter company representative number to approve/reject (0 to go back to menu): ",
+            controller::getPendingCompanyReps,
+            idx -> extractStringIDFromString(controller.getPendingCompanyReps().get(idx)),
+            (repID, approve) -> {
+                controller.approveRejectCompanyRep(repID, approve);
+                System.out.println("Company representative " + (approve ? "approved" : "rejected") + " successfully.");
+            });
+    }
+
+    private void handleApproveRejectInternship() {
+        handleApproveRejectPatternInt("INTERNSHIP LIST",
+            "No pending internships.",
+            "  Enter internship number to approve/reject (0 to go back to menu): ",
+            controller::getPendingInternships,
+            (internshipID, approve) -> {
+                controller.updateInternshipApproval(internshipID, approve);
+                System.out.println("Internship " + (approve ? "approved" : "rejected") + " successfully.");
+            });
+    }
+
+    private void handleApproveRejectWithdrawal() {
+        handleApproveRejectPatternInt("WITHDRAWAL REQUESTS",
+            "No withdrawal requests pending.",
+            "  Enter application number to approve/reject (0 to go back to menu): ",
+            controller::getWithdrawalRequests,
+            (applicationID, approve) -> {
+                controller.approveRejectWithdrawal(applicationID, approve);
+                System.out.println(approve ? "Withdrawal approved successfully." : 
+                    "Withdrawal rejected. Application restored to previous status.");
+            });
+    }
+
+    private void handleFilterInternships() {
+        handleFilterMenu(controller.getFilterSettings(), controller.internshipController.getAllInternships(),
+            () -> controller.internshipController.getAllInternships());
     }
     
-    public boolean getApprovalDecision() {
-        System.out.print("  Approve? (y/n): ");
-        String input = sc.nextLine().trim().toLowerCase();
-        return input.equals("y") || input.equals("yes");
-    }
-
-    public void displayInternshipList(List<Internship> list) {
-        System.out.println("\n─".repeat(60));
-        System.out.println("  INTERNSHIP LIST");
-        System.out.println("─".repeat(60));
-        if (list.isEmpty()) {
-            System.out.println("  No internships found.");
-        } else {
-            for (Internship i : list) {
-                System.out.println(i.toString());
-            }
-        }
-    }
-
-    public void displayApplications(List<Application> list) {
-        System.out.println("\n─".repeat(60));
-        System.out.println("  APPLICATIONS");
-        System.out.println("─".repeat(60));
-        if (list.isEmpty()) {
-            System.out.println("  No applications found.");
-        } else {
-            for (Application app : list) {
-                System.out.println(app.toString());
-            }
-        }
-    }
-
-    public void showCompanyRepList(List<CompanyRepresentative> list) {
-        System.out.println("\n─".repeat(60));
-        System.out.println("  COMPANY REPRESENTATIVES");
-        System.out.println("─".repeat(60));
-        if (list.isEmpty()) {
-            System.out.println("  No company representatives found.");
-        } else {
-            for (CompanyRepresentative rep : list) {
-                System.out.println(rep.toString());
-            }
-        }
-    }
-
-    public void displayReport(Report report) {
-        System.out.println("\n═".repeat(60));
-        System.out.println("  GENERATED REPORT");
-        System.out.println("═".repeat(60));
-        report.generateSummary();
+    private void handleListInternshipOpportunities() {
+        displayPaginatedInternshipTable("INTERNSHIP OPPORTUNITIES",
+            controller.internshipController.getAllInternships(controller.getFilterSettings()),
+            "No internships available.", controller::getInternshipDetails,
+            controller.getFilterSettings(), null, null, true);
     }
 }

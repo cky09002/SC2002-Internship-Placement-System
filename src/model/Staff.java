@@ -1,10 +1,12 @@
 package Assignment.src.model;
 
+import Assignment.src.utils.ValidationHelper;
+
 public class Staff extends User {
     private String staffDepartment;
 
-    public Staff(String userID, String name, String password,String email, String staffDepartment) {
-        super(userID, name, password,email);
+    public Staff(String userID, String name, String password, String email, String staffDepartment) {
+        super(userID, name, password, email);
         this.staffDepartment = staffDepartment;
     }
 
@@ -12,9 +14,9 @@ public class Staff extends User {
         return staffDepartment;
     }
 
-    @Override
-    public void displayProfile() {
-        System.out.println("Staff: " + getUserID() + " | " + getName() + " | Dept: " + staffDepartment);
+    public void setStaffDepartment(String staffDepartment) {
+        ValidationHelper.validateNotEmpty(staffDepartment, "Department");
+        this.staffDepartment = staffDepartment;
     }
 
     @Override

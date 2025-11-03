@@ -1,9 +1,7 @@
 package Assignment.src.model;
 
 import Assignment.src.constant.ApplicationStatus;
-import Assignment.src.exceptions.IDNotFoundException;
-import Assignment.src.exceptions.TooManyApplicationsException;
-import Assignment.src.exceptions.WrongApplicationStatusException;
+import Assignment.src.utils.ValidationHelper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,30 +20,23 @@ public class Student extends User {
         this.major = major;
     }
 
-    public int getYearOfStudy() { return yearOfStudy; }
-    public String getMajor() { return major; }
     public List<Application> getApplications() { return applications; }
-
-    public void logout() {
-        setLoggedIn(false);
-    }
 
     public Application findApplicationWithID(int applicationID) {
         return applications.stream()
                 .filter((a) -> a.getId() == applicationID)
                 .findFirst()
-                .orElseThrow(() -> new IDNotFoundException("application", applicationID));
+                .orElseThrow(() -> new IllegalArgumentException("Couldn't find application with ID " + applicationID + "."));
     }
 
     public Application submitApplication(Internship internship) {
-        // enforce per-student application limit
-        if (applications.size() >= MAX_APPLICATIONS) {
-            throw new TooManyApplicationsException(MAX_APPLICATIONS);
-        }
+        // enforce per-student application limit (exclude only WITHDRAWN applications)
+        long activeApplications = applications.stream()
+                .filter(a -> a.getStatus() != ApplicationStatus.WITHDRAWN)
+                .count();
         
-        // Check eligibility
-        if (!internship.isEligibleForStudent(this)) {
-            throw new IllegalStateException("You are not eligible for this internship. Check your major, year of study, or visibility status.");
+        if (activeApplications >= MAX_APPLICATIONS) {
+            throw new IllegalArgumentException("Maximum of " + MAX_APPLICATIONS + " applications allowed.");
         }
 
         // create the application object and pass it to associated internship
@@ -64,10 +55,11 @@ public class Student extends User {
     public void acceptApplication(Application app) {
         // check that chosen application is successful
         if (app.getStatus() != ApplicationStatus.SUCCESSFUL) {
-            throw new WrongApplicationStatusException(app.getStatus());
+            throw new IllegalArgumentException("Application is " + app.getStatus() + ", needs to be " + ApplicationStatus.SUCCESSFUL + " to be accepted.");
         }
 
-        app.setStatus(ApplicationStatus.CONFIRMED);
+        // Update status to ACCEPTED when student confirms placement
+        app.setStatus(ApplicationStatus.ACCEPTED);
         // Withdraw all other applications
         applications.stream()
                 .filter((a) -> a != app)
@@ -76,21 +68,32 @@ public class Student extends User {
         app.getInternship().confirmPlacement();
     }
 
-    public void withdrawApplication(Application app) {
-        app.requestWithdrawal();
+    public void withdrawApplication(Application app, String reason) {
+        app.requestWithdrawal(reason);
     }
-
-    @Override
-    public void displayProfile() {
-        System.out.println("Student: " + getUserID() + 
-                          " | Name: " + getName() + 
-                          " | Year: " + yearOfStudy + 
-                          " | Major: " + major + 
-                          " | Email: " + getEmail());
+    
+    /**
+     * Withdraw application without reason (overloaded)
+     */
+    public void withdrawApplication(Application app) {
+        app.requestWithdrawal((String) null);
     }
 
     @Override
     public String getUserType() {
         return "Student";
+    }
+    
+    public int getYearOfStudy() { return yearOfStudy; }
+    public String getMajor() { return major; }
+
+    public void setYearOfStudy(int yearOfStudy) {
+        ValidationHelper.validateRange(yearOfStudy, 1, 5, "Year of study");
+        this.yearOfStudy = yearOfStudy;
+    }
+    
+    public void setMajor(String major) {
+        ValidationHelper.validateNotEmpty(major, "Major");
+        this.major = major;
     }
 }

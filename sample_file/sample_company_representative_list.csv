@@ -1,3 +1,6 @@
 CompanyRepID,Name,CompanyName,Department,Position,Email,Password,Status
 Kchong042@e.ntu.edu.sg,Chong Kok Yang,Facebook,Algorityhm,Tech head,Kchong042@e.ntu.edu.sg,password,Approved
-1,1,1,1,1,1,1,Pending
+testrep1@test.com,Test Rep 1,Test Company,Test Dept,Test Position,testrep1@test.com,password,Approved
+wenxu@gmail.com,Cky,Tiktok,Business Intelligence,Software Engineer,wenxu@gmail.com,password,Approved
+newrep@test.com,New Rep,New Company,Dept,Position,newrep@test.com,password,Approved
+comp002@test.com,Test Rep,Test Company,Dept,Position,comp002@test.com,password,Approved
