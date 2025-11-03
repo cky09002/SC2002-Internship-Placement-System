@@ -2,6 +2,8 @@
 build/
 *.class
 out/
+# REASON: Compiled bytecode (.class files) can be regenerated from source.
+# Build artifacts should not be versioned as they can be recreated.
 
 # IDE specific files
 .idea/
@@ -12,6 +14,9 @@ out/
 .settings/
 .classpath
 .project
+# REASON: IDE configuration files (.idea, *.iml for IntelliJ, .vscode for VS Code)
+# These are personal preferences and machine-specific. Each developer should
+# configure their own IDE settings.
 
 # OS specific files
 .DS_Store
@@ -19,23 +24,33 @@ Thumbs.db
 *.swp
 *.swo
 *~
+# REASON: OS-specific files (.DS_Store for macOS, Thumbs.db for Windows)
+# Editor temporary files (*.swp for vim, *~ for backups)
+# These have no relevance to the codebase.
 
 # Log files
 *.log
+# REASON: Log files are generated at runtime and can be large.
+# They contain runtime information, not source code.
 
 # Temporary files
 *.tmp
 *.bak
 *.cache
+# REASON: Temporary and backup files are not source code and should not be tracked.
 
 # CSV files with personal data (if needed to exclude)
 # Uncomment if you don't want to push CSV files
 # sample_file/*.csv
+# REASON: Sample CSV files are kept commented out to allow tracking of sample data.
+# Uncomment if you need to protect sensitive data.
 
 # Java specific
 *.jar
 *.war
 *.ear
+# REASON: Packaged Java archives. For plain Java projects without Maven/Gradle,
+# these are build artifacts that can be regenerated.
 
 # Maven (if used in future)
 target/
@@ -44,16 +59,21 @@ pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 release.properties
+# REASON: Future-proofing for potential Maven adoption.
+# Maven build artifacts should not be versioned.
 
 # Gradle (if used in future)
 .gradle/
 gradle-app.setting
 !gradle-app.setting3
+# REASON: Future-proofing for potential Gradle adoption.
+# Gradle build cache and configuration should not be versioned.
 
 # Eclipse
 bin/
 .settings/
 .metadata
+# REASON: Eclipse workspace files are IDE-specific and should not be shared.
 
 # NetBeans
 nbproject/
@@ -61,12 +81,17 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+# REASON: NetBeans project files are IDE-specific and should not be shared.
 
 # Docker-related temp files
 .dockerignore.bak
 docker-compose.override.yml
 .docker/
+# REASON: Docker temporary files and override configurations are environment-specific.
 
 # Documentation and assignment files
 *.pdf
 Assignment.iml
+# REASON: PDF files (assignment documents) are large binary files that don't need versioning.
+# Assignment.iml is a specific IntelliJ project file that should be excluded.
+# NOTE: Keep *.pdf excluded to save repository space.

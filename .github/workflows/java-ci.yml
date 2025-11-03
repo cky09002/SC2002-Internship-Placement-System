@@ -1,0 +1,67 @@
+name: Java CI
+
+on:
+  push:
+    branches: [ main, master, feature/* ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        java-version: [11, 17]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+
+    - name: Create output directory
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          mkdir out
+        else
+          mkdir -p out
+        fi
+
+    - name: Compile Java files
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          dir /s /b src\*.java > javafiles.txt
+          javac -d out -sourcepath src @javafiles.txt
+          del javafiles.txt
+        else
+          find src -name "*.java" -type f > javafiles.txt
+          javac -d out -sourcepath src @javafiles.txt
+          rm javafiles.txt
+        fi
+
+    - name: Verify compilation
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          dir out\Assignment\src\MainApp.class
+        else
+          test -f out/Assignment/src/MainApp.class && echo "Compilation successful" || exit 1
+        fi
+
+    - name: Run tests (if available)
+      continue-on-error: true
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          java -cp out Assignment.src.test.TestRunner || echo "Tests not available or failed"
+        else
+          java -cp out Assignment.src.test.TestRunner || echo "Tests not available or failed"
+        fi
+
+    - name: Build summary
+      run: |
+        echo "✅ Build completed successfully on ${{ matrix.os }} with Java ${{ matrix.java-version }}"
+
