@@ -665,7 +665,7 @@ System allows Company Representatives to create internship opportunities only wh
 ### Test Case 14: Internship Opportunity Approval Status
 
 **Expected Behavior:**  
-Company Representatives can com.sc2002.assignment.view pending, approved, or rejected status updates for their submitted opportunities.
+Company Representatives can view pending, approved, or rejected status updates for their submitted opportunities.
 
 **Failure Scenarios:**
 - Status updates are not visible
