@@ -1,1 +1,68 @@
+# Compiled class files
 build/
+*.class
+out/
+
+# IDE specific files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS specific files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# CSV files with personal data (if needed to exclude)
+# Uncomment if you don't want to push CSV files
+# sample_file/*.csv
+
+# Java specific
+*.jar
+*.war
+*.ear
+
+# Maven (if used in future)
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle (if used in future)
+.gradle/
+gradle-app.setting
+!gradle-app.setting3
+
+# Eclipse
+bin/
+.settings/
+.metadata
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Docker-related temp files
+.dockerignore.bak
+docker-compose.override.yml
+.docker/
