@@ -64,13 +64,21 @@ jobs:
         echo Finding Java files...
         dir /s /b src\*.java > javafiles.txt
         echo Compiling Java files...
-        javac -d out -sourcepath src @javafiles.txt || (
+        javac -d out -sourcepath src @javafiles.txt
+        if errorlevel 1 (
           echo Compilation failed. Checking errors...
+          echo File list being used:
           type javafiles.txt
+          echo.
+          echo Checking output directory:
+          dir /s /b out 2>nul || echo Output directory is empty or doesn't exist
           del javafiles.txt
           exit /b 1
         )
         echo Compilation successful
+        echo Verifying compiled classes...
+        if exist out\Assignment\src\MainApp.class (echo MainApp.class found) else (echo MainApp.class missing)
+        if exist out\Assignment\src\InternshipApp.class (echo InternshipApp.class found) else (echo InternshipApp.class missing)
         del javafiles.txt
 
     - name: Verify compilation (Unix)
