@@ -32,16 +32,31 @@ jobs:
       if: runner.os != 'Windows'
       shell: bash
       run: |
+        echo "Finding Java files..."
+        find src -name "*.java" -type f | wc -l | xargs echo "Found Java files:"
+        echo "Compiling Java files..."
         find src -name "*.java" -type f > javafiles.txt
-        javac -d out -sourcepath src @javafiles.txt
+        javac -d out -sourcepath src @javafiles.txt 2>&1
+        echo "✅ Compilation successful"
+        echo "Verifying compiled classes..."
+        test -f out/Assignment/src/MainApp.class && echo "MainApp.class found" || echo "MainApp.class missing"
+        test -f out/Assignment/src/InternshipApp.class && echo "InternshipApp.class found" || echo "InternshipApp.class missing"
         rm javafiles.txt
 
     - name: Compile Java files (Windows)
       if: runner.os == 'Windows'
       shell: cmd
       run: |
+        echo Finding Java files...
         dir /s /b src\*.java > javafiles.txt
-        javac -d out -sourcepath src @javafiles.txt
+        echo Compiling Java files...
+        javac -d out -sourcepath src @javafiles.txt || (
+          echo Compilation failed. Checking errors...
+          type javafiles.txt
+          del javafiles.txt
+          exit /b 1
+        )
+        echo Compilation successful
         del javafiles.txt
 
     - name: Verify compilation (Unix)
