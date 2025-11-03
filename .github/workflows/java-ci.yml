@@ -25,43 +25,48 @@ jobs:
         distribution: 'temurin'
 
     - name: Create output directory
-      run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          mkdir out
-        else
-          mkdir -p out
-        fi
+      shell: bash
+      run: mkdir -p out
 
-    - name: Compile Java files
+    - name: Compile Java files (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
       run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          dir /s /b src\*.java > javafiles.txt
-          javac -d out -sourcepath src @javafiles.txt
-          del javafiles.txt
-        else
-          find src -name "*.java" -type f > javafiles.txt
-          javac -d out -sourcepath src @javafiles.txt
-          rm javafiles.txt
-        fi
+        find src -name "*.java" -type f > javafiles.txt
+        javac -d out -sourcepath src @javafiles.txt
+        rm javafiles.txt
 
-    - name: Verify compilation
+    - name: Compile Java files (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
       run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          dir out\Assignment\src\MainApp.class
-        else
-          test -f out/Assignment/src/MainApp.class && echo "Compilation successful" || exit 1
-        fi
+        dir /s /b src\*.java > javafiles.txt
+        javac -d out -sourcepath src @javafiles.txt
+        del javafiles.txt
+
+    - name: Verify compilation (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        test -f out/Assignment/src/MainApp.class && echo "✅ MainApp compiled successfully" || (echo "❌ MainApp.class not found" && exit 1)
+        test -f out/Assignment/src/InternshipApp.class && echo "✅ InternshipApp compiled successfully" || (echo "❌ InternshipApp.class not found" && exit 1)
+
+    - name: Verify compilation (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        if exist out\Assignment\src\MainApp.class (echo ✅ MainApp compiled successfully) else (echo ❌ MainApp.class not found && exit /b 1)
+        if exist out\Assignment\src\InternshipApp.class (echo ✅ InternshipApp compiled successfully) else (echo ❌ InternshipApp.class not found && exit /b 1)
 
     - name: Run tests (if available)
       continue-on-error: true
+      shell: bash
       run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          java -cp out Assignment.src.test.TestRunner || echo "Tests not available or failed"
-        else
-          java -cp out Assignment.src.test.TestRunner || echo "Tests not available or failed"
-        fi
+        java -cp out Assignment.src.test.TestRunner || echo "Tests not available or failed (this is expected if CSV files are missing)"
 
     - name: Build summary
+      shell: bash
       run: |
         echo "✅ Build completed successfully on ${{ matrix.os }} with Java ${{ matrix.java-version }}"
+        echo "✅ MainApp and InternshipApp compiled and verified"
 
