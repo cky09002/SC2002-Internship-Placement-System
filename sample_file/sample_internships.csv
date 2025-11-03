@@ -1,2 +1,19 @@
 InternshipID,Title,Description,Level,Major,OpenDate,CloseDate,Company,CreatorID,Visible,NumSlots,FilledSlots,Status
-100000,Software Engineer,SGD 1500,Basic,Computer Science,2025-11-02,2025-12-02,Facebook,Kchong042@e.ntu.edu.sg,true,10,0,APPROVED
+100000,Basic Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Facebook,Kchong042@e.ntu.edu.sg,true,5,0,APPROVED
+100001,Intermediate Internship,Description,Intermediate,Computer Science,2025-10-24,2025-12-03,Facebook,Kchong042@e.ntu.edu.sg,true,5,0,APPROVED
+100002,Advanced Internship,Description,Advanced,Data Science,2025-10-24,2025-12-03,Facebook,Kchong042@e.ntu.edu.sg,true,5,0,APPROVED
+100003,Basic Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Test Company,testrep1@test.com,true,5,0,APPROVED
+100004,Wrong Major,Description,Basic,Data Science,2025-10-24,2025-12-03,Test Company,testrep1@test.com,true,5,0,APPROVED
+100005,Test Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Tiktok,wenxu@gmail.com,true,5,0,APPROVED
+100006,Internship 1,Description,Basic,Computer Science,2025-10-24,2025-12-03,Tiktok,wenxu@gmail.com,true,5,0,APPROVED
+100007,Internship 2,Description,Basic,Computer Science,2025-10-24,2025-12-03,Tiktok,wenxu@gmail.com,true,5,0,APPROVED
+100008,New Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,New Company,newrep@test.com,true,10,0,APPROVED
+100009,Pending Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,New Company,newrep@test.com,true,5,0,APPROVED
+100010,Test Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Facebook,Kchong042@e.ntu.edu.sg,false,5,0,APPROVED
+100011,Updated Title,Description,Basic,Computer Science,2025-10-24,2025-12-03,Facebook,Kchong042@e.ntu.edu.sg,true,5,0,APPROVED
+100012,Test Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Test Company,testrep1@test.com,true,5,0,APPROVED
+100013,Test Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Tiktok,wenxu@gmail.com,true,2,2,FILLED
+100014,Updated Title,Updated Description,Basic,Computer Science,2025-10-24,2025-12-03,New Company,newrep@test.com,true,10,0,APPROVED
+100015,Test Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Facebook,Kchong042@e.ntu.edu.sg,true,5,0,APPROVED
+100016,Test Internship 2,Description,Basic,Computer Science,2025-10-24,2025-12-03,Facebook,Kchong042@e.ntu.edu.sg,false,5,0,REJECTED
+100017,Test Internship,Description,Basic,Computer Science,2025-10-24,2025-12-03,Tiktok,wenxu@gmail.com,true,5,0,APPROVED

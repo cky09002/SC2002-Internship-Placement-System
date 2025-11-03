@@ -3,8 +3,8 @@ package Assignment.src.constant;
 public enum ApplicationStatus {
     PENDING,
     SUCCESSFUL,
+    ACCEPTED,  // Student has confirmed/accepted the successful application
     UNSUCCESSFUL,
-    CONFIRMED,
     WITHDRAWAL_REQUESTED,
     WITHDRAWN
 }

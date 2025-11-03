@@ -14,7 +14,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApplicationCsvHandler {
+/**
+ * CSV handler for Application model.
+ * Implements CsvHandler interface for consistency.
+ */
+public class ApplicationCsvHandler implements CsvHandler {
     
     /**
      * Load all applications from CSV file.
@@ -26,43 +30,66 @@ public class ApplicationCsvHandler {
             String line = reader.readLine(); // skip header
             
             while ((line = reader.readLine()) != null && !line.trim().isEmpty()) {
-                String[] cols = line.split(",");
-                if (cols.length >= 5) {
-                    int id = Integer.parseInt(cols[0]);
-                    int internshipID = Integer.parseInt(cols[1]);
-                    String studentID = cols[2];
-                    LocalDateTime dateApplied = LocalDateTime.parse(cols[3]);
-                    ApplicationStatus status = ApplicationStatus.valueOf(cols[4]);
-                    ApplicationStatus previousStatus = cols.length >= 6 && !cols[5].isEmpty() 
-                            ? ApplicationStatus.valueOf(cols[5]) : null;
-                    
-                    // Find the internship
-                    Internship internship = Internship.findWithID(internshipID);
-                    if (internship == null) {
-                        System.out.println("Warning: Internship " + internshipID + " not found for application " + id + ", skipping.");
-                        continue;
+                try {
+                    String[] cols = line.split(",");
+                    if (cols.length >= 5) {
+                        int id = Integer.parseInt(cols[0]);
+                        int internshipID = Integer.parseInt(cols[1]);
+                        String studentID = cols[2];
+                        LocalDateTime dateApplied = LocalDateTime.parse(cols[3]);
+                        
+                        // Handle invalid status values (e.g., CONFIRMED should be SUCCESSFUL)
+                        String statusStr = cols[4].trim();
+                        ApplicationStatus status;
+                        try {
+                            status = ApplicationStatus.valueOf(statusStr);
+                        } catch (IllegalArgumentException e) {
+                            // Convert old CONFIRMED status to SUCCESSFUL
+                            if ("CONFIRMED".equals(statusStr)) {
+                                System.out.println("Warning: Converting deprecated CONFIRMED status to SUCCESSFUL for application " + id);
+                                status = ApplicationStatus.SUCCESSFUL;
+                            } else {
+                                System.out.println("Warning: Invalid application status '" + statusStr + "' for application " + id + ", skipping.");
+                                continue;
+                            }
+                        }
+                        
+                        ApplicationStatus previousStatus = cols.length >= 6 && !cols[5].isEmpty() 
+                                ? (cols[5].trim().equals("CONFIRMED") ? ApplicationStatus.SUCCESSFUL : ApplicationStatus.valueOf(cols[5].trim())) : null;
+                        
+                        String withdrawalReason = cols.length >= 7 && !cols[6].isEmpty() ? cols[6] : null;
+                        
+                        // Find the internship
+                        Internship internship = Internship.findWithID(internshipID);
+                        if (internship == null) {
+                            System.out.println("Warning: Internship " + internshipID + " not found for application " + id + ", skipping.");
+                            continue;
+                        }
+                        
+                        // Find the student
+                        Student student = (Student) UserRegistry.getInstance().findById(studentID);
+                        if (student == null) {
+                            System.out.println("Warning: Student " + studentID + " not found for application " + id + ", skipping.");
+                            continue;
+                        }
+                        
+                        // Create application using helper method
+                        Application application = Application.createForCsv(id, internship, student, dateApplied, status, previousStatus, withdrawalReason);
+                        
+                        // Add to all tracking lists (list is already cleared before this, so no duplicates)
+                        Application.getAllApplicationsList().add(application);
+                        internship.getApplications().add(application);
+                        student.getApplications().add(application);
+                        
+                        // Update nextID to avoid collisions
+                        int currentNextID = Application.getNextID();
+                        if (id >= currentNextID) {
+                            Application.setNextID(id + 1);
+                        }
                     }
-                    
-                    // Find the student
-                    Student student = (Student) UserRegistry.getInstance().findById(studentID);
-                    if (student == null) {
-                        System.out.println("Warning: Student " + studentID + " not found for application " + id + ", skipping.");
-                        continue;
-                    }
-                    
-                    // Create application using helper method
-                    Application application = Application.createForCsv(id, internship, student, dateApplied, status, previousStatus);
-                    
-                    // Add to all tracking lists
-                    Application.getAllApplicationsList().add(application);
-                    internship.getApplications().add(application);
-                    student.getApplications().add(application);
-                    
-                    // Update nextID to avoid collisions
-                    int currentNextID = Application.getNextID();
-                    if (id >= currentNextID) {
-                        Application.setNextID(id + 1);
-                    }
+                } catch (Exception e) {
+                    System.out.println("Warning: Error loading application from line: " + line + " - " + e.getMessage());
+                    // Continue loading other applications
                 }
             }
             reader.close();
@@ -92,6 +119,7 @@ public class ApplicationCsvHandler {
                         lines.add(formatCsvLine(application));
                         found = true;
                     } else {
+                        // Keep existing line
                         lines.add(line);
                     }
                 }
@@ -119,13 +147,14 @@ public class ApplicationCsvHandler {
      * Format application data as CSV line.
      */
     private static String formatCsvLine(Application application) {
-        return String.format("%d,%d,%s,%s,%s,%s",
+        return String.format("%d,%d,%s,%s,%s,%s,%s",
                 application.getId(), 
                 application.getInternship().getID(), 
                 application.getApplicant().getUserID(), 
                 application.getDateApplied(), 
                 application.getStatus(), 
-                application.getPreviousStatus() != null ? application.getPreviousStatus() : "");
+                application.getPreviousStatus() != null ? application.getPreviousStatus() : "",
+                application.getWithdrawalReason() != null ? application.getWithdrawalReason() : "");
     }
 }
 

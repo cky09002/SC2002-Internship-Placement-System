@@ -1,5 +1,7 @@
 package Assignment.src.model;
 
+import Assignment.src.utils.ValidationHelper;
+
 public abstract class User {
     private String userID;
     private String name;
@@ -7,7 +9,6 @@ public abstract class User {
     private String email;
     private boolean loggedIn = false;
 
-    //constructor
     public User(String userID, String name, String password, String email){
         this.userID = userID;
         this.name = name;
@@ -15,28 +16,36 @@ public abstract class User {
         this.email = email;
     }
 
-    // accessors
     public String getUserID() { return userID; }
     public String getName() { return name; }
     public String getEmail(){ return email; }
-    protected String getPassword() { return password; } // protected in case subclasses need it
+    protected String getPassword() { return password; }
     public boolean isLoggedIn() { return loggedIn; }
+    
+    public void setName(String name) {
+        ValidationHelper.validateNotEmpty(name, "Name");
+        this.name = name;
+    }
+    
+    public void setEmail(String email) {
+        ValidationHelper.validateEmail(email);
+        this.email = email;
+    }
 
-    // Control login state and password verification
     public void setLoggedIn(boolean loggedIn) { this.loggedIn = loggedIn; }
     public boolean verifyPassword(String pw) { return pw != null && pw.equals(this.password); }
+    
+    public void logout() {
+        setLoggedIn(false);
+    }
     
     public void changePassword(String oldPassword, String newPassword) {
         if (!verifyPassword(oldPassword)) {
             throw new IllegalArgumentException("Incorrect old password.");
         }
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            throw new IllegalArgumentException("New password cannot be empty.");
-        }
+        ValidationHelper.validateNotEmpty(newPassword, "New password");
         this.password = newPassword;
     }
 
-    // abstract methods to be implemented by subclasses
-    public abstract void displayProfile();
     public abstract String getUserType();
 }

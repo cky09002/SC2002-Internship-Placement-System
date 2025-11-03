@@ -1,8 +1,11 @@
 package Assignment.src.model;
 
 import Assignment.src.constant.StaffApprovalStatus;
+import Assignment.src.utils.ValidationHelper;
 
 public class CompanyRepresentative extends User {
+    public static final int MAX_INTERNSHIPS = 5; // Maximum internships per company representative
+    
     private String companyName;
     private String department;
     private String position;
@@ -35,6 +38,21 @@ public class CompanyRepresentative extends User {
 
     public String getPosition() {
         return position;
+    }
+
+    public void setCompanyName(String companyName) {
+        ValidationHelper.validateNotEmpty(companyName, "Company name");
+        this.companyName = companyName;
+    }
+    
+    public void setDepartment(String department) {
+        ValidationHelper.validateNotEmpty(department, "Department");
+        this.department = department;
+    }
+    
+    public void setPosition(String position) {
+        ValidationHelper.validateNotEmpty(position, "Position");
+        this.position = position;
     }
 
     public boolean isApproved() {
@@ -70,20 +88,6 @@ public class CompanyRepresentative extends User {
         }
     }
 
-    @Override
-    public void displayProfile() {
-        System.out.println("CompanyRep: " + getUserID() +
-                           " | Name: " + getName() +
-                           " | Company: " + companyName +
-                           " | Dept: " + department +
-                           " | Position: " + position +
-                           " | Email: " + getEmail() +
-                           " | Status: " + getApprovalStatusDescription());
-    }
-
-    public void logout() {
-        setLoggedIn(false);
-    }
 
     @Override
     public String getUserType() {

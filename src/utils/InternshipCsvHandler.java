@@ -1,8 +1,7 @@
 package Assignment.src.utils;
 
-import Assignment.src.model.Internship;
-import Assignment.src.model.UserRegistry;
-import Assignment.src.constant.InternshipStatus;
+import Assignment.src.model.*;
+import Assignment.src.constant.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,7 +11,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InternshipCsvHandler {
+/**
+ * CSV handler for Internship model.
+ * Implements CsvHandler interface for consistency.
+ */
+public class InternshipCsvHandler implements CsvHandler {
     
     /**
      * Load all internships from CSV file.
@@ -41,8 +44,8 @@ public class InternshipCsvHandler {
                     InternshipStatus status = InternshipStatus.valueOf(cols[12]);
                     
                     // Find the creator (CompanyRepresentative)
-                    Assignment.src.model.CompanyRepresentative creator = 
-                        (Assignment.src.model.CompanyRepresentative) UserRegistry.getInstance().findById(creatorID);
+                    CompanyRepresentative creator = 
+                        (CompanyRepresentative) UserRegistry.getInstance().findById(creatorID);
                     if (creator == null) {
                         System.out.println("Warning: Creator not found for internship " + id + ", skipping.");
                         continue;
@@ -55,15 +58,17 @@ public class InternshipCsvHandler {
                     
                     // Add to list
                     Internship.getInternshipsList().add(internship);
-                    
-                    // Update nextID to avoid collisions
-                    int currentNextID = Internship.getNextID();
-                    if (id >= currentNextID) {
-                        Internship.setNextID(id + 1);
-                    }
                 }
             }
             reader.close();
+            
+            // Update nextID to continue from max ID after loading
+            List<Internship> loaded = Internship.getInternshipsList();
+            if (!loaded.isEmpty()) {
+                int maxID = loaded.stream().mapToInt(Internship::getID).max().getAsInt();
+                Internship.setNextID(maxID + 1);
+            }
+            // If no internships loaded, nextID remains at default 100000
         } catch (IOException e) {
             System.out.println("Error loading internships: " + e.getMessage());
         }
@@ -119,8 +124,8 @@ public class InternshipCsvHandler {
     private static String formatCsvLine(Internship internship) {
         return String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%d,%d,%s",
                 internship.getID(), 
-                escapeCSV(internship.getTitle()), 
-                escapeCSV(internship.getDescription()), 
+                CsvHandler.escapeCSV(internship.getTitle()), 
+                CsvHandler.escapeCSV(internship.getDescription()), 
                 internship.getLevel(), 
                 internship.getPreferredMajor(), 
                 internship.getOpenDate(), 
@@ -133,16 +138,6 @@ public class InternshipCsvHandler {
                 internship.getStatus());
     }
     
-    /**
-     * Escape commas in CSV strings.
-     */
-    private static String escapeCSV(String s) {
-        if (s == null) return "";
-        // For simplicity, just wrap in quotes if contains comma
-        if (s.contains(",") || s.contains("\n")) {
-            return "\"" + s.replace("\"", "\"\"") + "\"";
-        }
-        return s;
-    }
+    // Use CsvHandler.escapeCSV() for consistency
 }
 
