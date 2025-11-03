@@ -309,35 +309,312 @@ public class TestRunner {
         System.out.println("                    MANUAL TEST CASES");
         System.out.println("═══════════════════════════════════════════════════════════════════════════════\n");
         System.out.println("The following test cases require manual interaction with the application.\n");
-        System.out.println("Run the application using: java -cp build Assignment.src.MainApp\n");
-        System.out.println("Then follow the instructions below:\n");
+        System.out.println("Run the application using: java -cp out Assignment.src.MainApp\n");
+        System.out.println("Then follow the detailed instructions below:\n");
         
-        String[] manualTests = {
-            "Test Case 1: Valid User Login - Login with valid credentials for each user type",
-            "Test Case 2: Invalid ID - Try logging in with invalid ID",
-            "Test Case 3: Incorrect Password - Try logging in with wrong password",
-            "Test Case 4: Password Change - Change password and verify new password works",
-            "Test Case 5: Company Rep Registration & Approval - Register new company rep and approve as staff",
-            "Test Case 6: Internship Visibility Filtering - Verify students only see eligible internships",
-            "Test Case 7: Application Eligibility - Apply for internships and verify eligibility checks",
-            "Test Case 8: View Application After Visibility Toggle - Create app, toggle visibility OFF, verify still visible",
-            "Test Case 10: Single Placement Acceptance - Accept one placement and verify others withdrawn",
-            "Test Case 13: Internship Creation - Create new internship as company rep",
-            "Test Case 14: Internship Approval Status - View status updates after staff approval",
-            "Test Case 15: Company Rep Detail Access - Verify company rep can always see own internships",
-            "Test Case 16: Edit Restriction - Verify cannot edit approved internships",
-            "Test Case 18: Application Management - Verify slot counting and placement confirmation",
-            "Test Case 19: Placement Status Update - Verify status updates correctly",
-            "Test Case 20: CRUD Operations - Create, edit (before approval), and delete internships",
-            "Test Case 21: Staff Approval/Rejection - Approve or reject internships as staff",
-            "Test Case 22: Visibility Toggle - Toggle visibility and verify student view changes"
-        };
+        // Test Case 1: Valid User Login
+        printManualTest(1, "Valid User Login",
+            "Expected: User should be able to access their dashboard based on their roles",
+            "Steps:",
+            "  1. Launch the application",
+            "  2. Select option 1 (Login)",
+            "  3. Enter valid student credentials (e.g., from sample_student_list.csv)",
+            "  4. Verify: Student dashboard is displayed with appropriate menu options",
+            "  5. Logout and repeat with staff credentials",
+            "  6. Verify: Staff dashboard is displayed with approval/review options",
+            "  7. Logout and repeat with approved company representative credentials",
+            "  8. Verify: Company representative dashboard is displayed with internship management options",
+            "Failure Indicators: Cannot log in, incorrect dashboard shown, or wrong menu options displayed");
         
-        for (int i = 0; i < manualTests.length; i++) {
-            System.out.println((i + 9) + ". " + manualTests[i]);
+        // Test Case 2: Invalid ID
+        printManualTest(2, "Invalid ID",
+            "Expected: User receives a notification about incorrect ID",
+            "Steps:",
+            "  1. Launch the application",
+            "  2. Select option 1 (Login)",
+            "  3. Enter an invalid user ID (e.g., 'INVALID123')",
+            "  4. Enter any password",
+            "  5. Verify: Error message is displayed: 'Invalid user ID. Please try again.'",
+            "  6. Verify: User is returned to login screen (not logged in)",
+            "Failure Indicators: Login succeeds with invalid ID, or error message is not meaningful");
+        
+        // Test Case 3: Incorrect Password
+        printManualTest(3, "Incorrect Password",
+            "Expected: System should deny access and alert the user to incorrect password",
+            "Steps:",
+            "  1. Launch the application",
+            "  2. Select option 1 (Login)",
+            "  3. Enter a valid user ID (e.g., from sample files)",
+            "  4. Enter an incorrect password",
+            "  5. Verify: Error message is displayed: 'Incorrect password. Please try again.'",
+            "  6. Verify: User is not logged in",
+            "Failure Indicators: Login succeeds with wrong password, or error message is not meaningful");
+        
+        // Test Case 4: Password Change Functionality
+        printManualTest(4, "Password Change Functionality",
+            "Expected: System updates password, prompt re-login and allows login with new credentials",
+            "Steps:",
+            "  1. Login with valid credentials",
+            "  2. Select password change option (usually in profile/settings menu)",
+            "  3. Enter current password",
+            "  4. Enter new password",
+            "  5. Verify: Password change confirmation message",
+            "  6. Logout",
+            "  7. Try logging in with old password - should fail",
+            "  8. Login with new password - should succeed",
+            "Failure Indicators: Password not updated, login with new password fails, or no re-login prompt");
+        
+        // Test Case 5: Company Representative Account Creation
+        printManualTest(5, "Company Representative Account Creation",
+            "Expected: A new Company Representative should only be able to log in after approval by Career Center Staff",
+            "Steps:",
+            "  1. Launch the application",
+            "  2. Select option 3 (Register)",
+            "  3. Register a new Company Representative with valid details",
+            "  4. Verify: Registration success message",
+            "  5. Try to login with new company rep credentials",
+            "  6. Verify: Error message displayed: 'Your account is pending approval. Please wait for Career Center Staff approval.'",
+            "  7. Logout and login as Career Center Staff",
+            "  8. Navigate to pending approvals section",
+            "  9. Approve the newly registered company representative",
+            "  10. Logout and login again with the company rep credentials",
+            "  11. Verify: Login succeeds and dashboard is displayed",
+            "Failure Indicators: Company rep can log in without approval, or approval process doesn't work");
+        
+        // Test Case 6: Internship Opportunity Visibility Based on User Profile and Toggle
+        printManualTest(6, "Internship Opportunity Visibility Based on User Profile and Toggle",
+            "Expected: Internship opportunities are visible to students based on year of study, major, level eligibility, and visibility setting",
+            "Steps:",
+            "  1. Login as a student (e.g., Year 2, Computer Science major)",
+            "  2. Navigate to view internships",
+            "  3. Verify: Only internships matching student's profile are shown (correct major, appropriate level for year)",
+            "  4. Login as Career Center Staff",
+            "  5. Toggle visibility OFF for an internship",
+            "  6. Logout and login as the same student",
+            "  7. View internships again",
+            "  8. Verify: The toggled internship is no longer visible",
+            "  9. Toggle visibility back ON as staff",
+            "  10. Verify: Internship becomes visible again to eligible students",
+            "Failure Indicators: Students see internships with wrong major/level, or visibility toggle doesn't work");
+        
+        // Test Case 7: Internship Application Eligibility
+        printManualTest(7, "Internship Application Eligibility",
+            "Expected: Students can only apply for internships relevant to their profile (correct major, appropriate level) when visibility is on",
+            "Steps:",
+            "  1. Login as a student (e.g., Year 2, Computer Science)",
+            "  2. Try to apply for an internship with different major - should fail",
+            "  3. Try to apply for an Intermediate/Advanced level internship as a Year 2 student - should fail",
+            "  4. Try to apply for a Basic level internship matching major - should succeed",
+            "  5. Login as staff and toggle visibility OFF for an internship",
+            "  6. Login as student and try to apply for that internship - should fail",
+            "  7. Toggle visibility back ON",
+            "  8. Verify: Student can now apply",
+            "Failure Indicators: Students can apply for wrong major/level, or can apply when visibility is off");
+        
+        // Test Case 8: Viewing Application Status after Visibility Toggle Off
+        printManualTest(8, "Viewing Application Status after Visibility Toggle Off",
+            "Expected: Students continue to have access to their application details regardless of internship visibility",
+            "Steps:",
+            "  1. Login as a student",
+            "  2. Apply for an eligible internship",
+            "  3. Verify: Application is created and visible in student's application list",
+            "  4. Note the application ID",
+            "  5. Logout and login as staff",
+            "  6. Toggle visibility OFF for the internship the student applied to",
+            "  7. Logout and login as the student again",
+            "  8. Navigate to view applications",
+            "  9. Verify: The application is still visible and accessible with all details",
+            "Failure Indicators: Application becomes inaccessible or details are missing when visibility is toggled off");
+        
+        // Test Case 9 is skipped (not in the list provided)
+        
+        // Test Case 10: Single Internship Placement Acceptance per Student
+        printManualTest(10, "Single Internship Placement Acceptance per Student",
+            "Expected: System allows accepting one internship placement and automatically withdraws all other applications",
+            "Steps:",
+            "  1. Login as a student",
+            "  2. Apply for multiple eligible internships (up to 3 applications)",
+            "  3. Verify: All applications are in PENDING status",
+            "  4. As a company representative (or staff), accept one of the student's applications",
+            "  5. Login as the student again",
+            "  6. View application status",
+            "  7. Verify: One application shows ACCEPTED status",
+            "  8. Verify: All other applications show WITHDRAWN status automatically",
+            "  9. Try to apply for another internship - should fail (already have accepted placement)",
+            "Failure Indicators: Student can accept multiple placements, or other applications remain active");
+        
+        // Test Case 11 and 12 are skipped (not in the list provided)
+        
+        // Test Case 13: Company Representative Internship Opportunity Creation
+        printManualTest(13, "Company Representative Internship Opportunity Creation",
+            "Expected: System allows Company Representatives to create internship opportunities only when they meet system requirements",
+            "Steps:",
+            "  1. Login as an approved company representative",
+            "  2. Navigate to create internship opportunity",
+            "  3. Try to create with invalid data (missing fields, invalid dates, etc.)",
+            "  4. Verify: Error messages are displayed for invalid data",
+            "  5. Create a valid internship opportunity",
+            "  6. Verify: Internship is created with PENDING status",
+            "  7. Check if company rep already has maximum allowed opportunities",
+            "  8. Try to create another opportunity when at maximum - should fail",
+            "  9. Verify: Error message indicates maximum reached",
+            "Failure Indicators: Invalid data is accepted, or creation exceeds maximum without error");
+        
+        // Test Case 14: Internship Opportunity Approval Status
+        printManualTest(14, "Internship Opportunity Approval Status",
+            "Expected: Company Representatives can view pending, approved, or rejected status updates for their submitted opportunities",
+            "Steps:",
+            "  1. Login as company representative",
+            "  2. Create an internship opportunity",
+            "  3. Verify: Status shows as PENDING",
+            "  4. Logout and login as Career Center Staff",
+            "  5. Navigate to pending internships",
+            "  6. Approve the internship opportunity",
+            "  7. Logout and login as the company representative again",
+            "  8. View internship opportunities",
+            "  9. Verify: Status is updated to APPROVED",
+            "  10. Repeat steps 2-7 but reject instead of approve",
+            "  11. Verify: Status is updated to REJECTED",
+            "Failure Indicators: Status not visible, incorrect status shown, or status not saved properly");
+        
+        // Test Case 15: Internship Detail Access for Company Representative
+        printManualTest(15, "Internship Detail Access for Company Representative",
+            "Expected: Company Representatives can always access full details of internships they created, regardless of visibility setting",
+            "Steps:",
+            "  1. Login as company representative",
+            "  2. Create an internship opportunity",
+            "  3. View full details of the internship - should be accessible",
+            "  4. Logout and login as staff",
+            "  5. Toggle visibility OFF for the company rep's internship",
+            "  6. Logout and login as the company representative again",
+            "  7. Navigate to view own internships",
+            "  8. Verify: Full details of the internship are still accessible",
+            "  9. Verify: All fields are visible (title, description, requirements, dates, etc.)",
+            "Failure Indicators: Details become inaccessible or incomplete when visibility is toggled off");
+        
+        // Test Case 16: Restriction on Editing Approved Opportunities
+        printManualTest(16, "Restriction on Editing Approved Opportunities",
+            "Expected: Edit functionality is restricted for Company Representatives once opportunities are approved by Career Center Staff",
+            "Steps:",
+            "  1. Login as company representative",
+            "  2. Create an internship opportunity",
+            "  3. Verify: Edit option is available (status is PENDING)",
+            "  4. Edit the internship details",
+            "  5. Verify: Changes are saved successfully",
+            "  6. Logout and login as staff",
+            "  7. Approve the internship opportunity",
+            "  8. Logout and login as company representative again",
+            "  9. Navigate to view the approved internship",
+            "  10. Verify: Edit option is not available or disabled",
+            "  11. Try to edit through any other means - should fail",
+            "Failure Indicators: Company rep can edit approved opportunities");
+        
+        // Test Case 17 is skipped (not in the list provided)
+        
+        // Test Case 18: Student Application Management and Placement Confirmation
+        printManualTest(18, "Student Application Management and Placement Confirmation",
+            "Expected: Company Representatives retrieve correct student applications, update slot availability accurately, and correctly confirm placement details",
+            "Steps:",
+            "  1. Login as a student and apply for an internship",
+            "  2. Logout and login as the company representative who created the internship",
+            "  3. Navigate to view applications for the internship",
+            "  4. Verify: Student application is listed with correct details (name, ID, major, year, etc.)",
+            "  5. Note the current slot availability",
+            "  6. Accept the student's application",
+            "  7. Verify: Slot availability decreases by 1",
+            "  8. Confirm the placement",
+            "  9. Verify: Placement confirmation status is updated",
+            "  10. Verify: Student's application status shows as ACCEPTED",
+            "  11. Verify: All details are correctly recorded",
+            "Failure Indicators: Incorrect application retrieval, slot count not updating, or placement details not recorded");
+        
+        // Test Case 19: Internship Placement Confirmation Status Update
+        printManualTest(19, "Internship Placement Confirmation Status Update",
+            "Expected: Placement confirmation status is updated to reflect the actual confirmation condition",
+            "Steps:",
+            "  1. Login as company representative",
+            "  2. View applications for an internship",
+            "  3. Accept a student's application",
+            "  4. Confirm the placement",
+            "  5. Verify: Placement confirmation status changes to CONFIRMED",
+            "  6. View the application details again",
+            "  7. Verify: Confirmation status is persisted and displayed correctly",
+            "  8. Login as the student",
+            "  9. View application status",
+            "  10. Verify: Application shows ACCEPTED and placement is confirmed",
+            "Failure Indicators: Status not updated, or incorrect status shown");
+        
+        // Test Case 20: Create, Edit, and Delete Internship Opportunity Listings
+        printManualTest(20, "Create, Edit, and Delete Internship Opportunity Listings",
+            "Expected: Company Representatives should be able to add new opportunities, modify existing details (before approval), and remove opportunities",
+            "Steps:",
+            "  1. Login as company representative",
+            "  2. Create a new internship opportunity",
+            "  3. Verify: Opportunity is created with all details",
+            "  4. Edit the opportunity (while still PENDING)",
+            "  5. Verify: Changes are saved successfully",
+            "  6. Delete the opportunity",
+            "  7. Verify: Opportunity is removed from the system",
+            "  8. Create another opportunity",
+            "  9. Get it approved by staff",
+            "  10. Try to edit - should fail (from Test Case 16)",
+            "  11. Try to delete approved opportunity - verify behavior (should be restricted or allowed based on requirements)",
+            "Failure Indicators: Cannot create/edit/delete, or errors during operations");
+        
+        // Test Case 21: Career Center Staff Internship Opportunity Approval
+        printManualTest(21, "Career Center Staff Internship Opportunity Approval",
+            "Expected: Career Center Staff can review and approve/reject internship opportunities submitted by Company Representatives",
+            "Steps:",
+            "  1. Login as company representative and create an internship",
+            "  2. Logout and login as Career Center Staff",
+            "  3. Navigate to pending internships/review section",
+            "  4. Verify: Submitted internship is visible with all details",
+            "  5. Review the internship details",
+            "  6. Approve the internship",
+            "  7. Verify: Status changes to APPROVED",
+            "  8. Verify: Internship becomes visible to eligible students",
+            "  9. Create another internship as company rep",
+            "  10. Login as staff and reject it",
+            "  11. Verify: Status changes to REJECTED",
+            "  12. Verify: Rejected internship is not visible to students",
+            "Failure Indicators: Cannot access submitted opportunities, approval/rejection fails, or status not updated");
+        
+        // Test Case 22: Toggle Internship Opportunity Visibility
+        printManualTest(22, "Toggle Internship Opportunity Visibility",
+            "Expected: Changes in visibility should be reflected accurately in the internship opportunity list visible to students",
+            "Steps:",
+            "  1. Login as staff and ensure an internship is approved and visible",
+            "  2. Login as an eligible student",
+            "  3. View internships",
+            "  4. Note the internships visible",
+            "  5. Logout and login as staff",
+            "  6. Toggle visibility OFF for one internship",
+            "  7. Logout and login as the student again",
+            "  8. View internships",
+            "  9. Verify: The toggled internship is no longer in the list",
+            "  10. Toggle visibility back ON",
+            "  11. Verify: Internship reappears in student's list",
+            "  12. Verify: All other internships remain unchanged",
+            "Failure Indicators: Visibility settings don't update, or don't affect opportunity listing as expected");
+        
+        System.out.println("\n═══════════════════════════════════════════════════════════════════════════════");
+        System.out.println("Note: Detailed test case instructions are also available in: src/test/TEST_PLAN.md");
+        System.out.println("═══════════════════════════════════════════════════════════════════════════════\n");
+    }
+    
+    /**
+     * Helper method to print a manual test case with detailed instructions
+     */
+    private static void printManualTest(int testNumber, String testName, String expected, String... steps) {
+        System.out.println("\n───────────────────────────────────────────────────────────────────────────────");
+        System.out.println("Test Case " + testNumber + ": " + testName);
+        System.out.println("───────────────────────────────────────────────────────────────────────────────");
+        System.out.println("Expected: " + expected);
+        System.out.println();
+        for (String step : steps) {
+            System.out.println(step);
         }
-        
-        System.out.println("\nDetailed test case instructions are available in: src/test/TEST_PLAN.md");
+        System.out.println();
     }
     
     /**
