@@ -66,3 +66,7 @@ nbdist/
 .dockerignore.bak
 docker-compose.override.yml
 .docker/
+
+# Documentation and assignment files
+*.pdf
+Assignment.iml
