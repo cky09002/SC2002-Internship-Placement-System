@@ -100,7 +100,8 @@ public abstract class BaseUserController {
 
     public abstract List<String> listInternships();
     public abstract List<Internship> getInternships();
-    public abstract void editProfile(String... fields);
+    public abstract void editProfile();
+
 
 
 }
