@@ -44,6 +44,7 @@ public abstract class BaseView {
     protected abstract void showInitialInternshipsView();
     protected abstract Map<Integer, MenuOption> initializeMenuOptions();
     protected abstract String getDashboardTitle();
+    protected abstract String getInternshipDetailsForFilter(int internshipID);
     
     protected void displayCenteredHeader(String title) {
         ViewFormatter.displayHeader(title, BORDER, WIDTH);
@@ -106,10 +107,6 @@ public abstract class BaseView {
     
     protected void handleFilterMenu(FilterSettings filterSettings, List<?> internships, Supplier<List<?>> getAllInternships) {
         FilterMenu.showFilterMenu(filterSettings, getAllInternships, this::getInternshipDetailsForFilter);
-    }
-    
-    protected String getInternshipDetailsForFilter(int internshipID) {
-        return "Internship ID: " + internshipID + " (Details not available in this view)";
     }
     
     protected void showInternshipsLoop(String header, Supplier<List<?>> getInternships, String emptyMsg,
