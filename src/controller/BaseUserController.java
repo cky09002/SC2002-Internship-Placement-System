@@ -98,8 +98,6 @@ public abstract class BaseUserController {
         return UserFormatter.formatProfile(user);
     }
 
-    public abstract List<String> listInternships();
-    public abstract List<Internship> getInternships();
     public abstract void editProfile();
 
 
