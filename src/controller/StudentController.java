@@ -15,7 +15,6 @@ public class StudentController extends BaseUserController {
         this.student = student;
     }
 
-    @Override
     public List<String> listInternships() {
         // Use filter settings that persist across menu pages
         List<Internship> internships = getInternships();
@@ -28,7 +27,6 @@ public class StudentController extends BaseUserController {
     /**
      * Get filtered internships visible to student
      */
-    @Override
     public List<Internship> getInternships() {
         return internshipController.getVisibleInternshipsForStudent(student, filterSettings);
     }
