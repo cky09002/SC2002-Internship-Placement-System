@@ -94,9 +94,5 @@ public class CompanyRepresentative extends User {
         return "CompanyRepresentative";
     }
 
-    @Override
-    public String toString() {
-        return String.format("ID: %s | Name: %s | Company: %s | Department: %s | Position: %s | Email: %s | Status: %s",
-                getUserID(), getName(), companyName, department, position, getEmail(), getApprovalStatusDescription());
-    }
+   
 }
