@@ -15,6 +15,7 @@ public class StudentController extends BaseUserController {
         this.student = student;
     }
 
+    @Override
     public List<String> listInternships() {
         // Use filter settings that persist across menu pages
         List<Internship> internships = getInternships();
@@ -27,6 +28,7 @@ public class StudentController extends BaseUserController {
     /**
      * Get filtered internships visible to student
      */
+    @Override
     public List<Internship> getInternships() {
         return internshipController.getVisibleInternshipsForStudent(student, filterSettings);
     }
@@ -100,6 +102,7 @@ public class StudentController extends BaseUserController {
     /**
      * Edit student profile fields
      */
+    @Override
     public void editProfile(String name, String email, Integer yearOfStudy, String major) {
         if (name != null && !name.trim().isEmpty()) {
             student.setName(name);
