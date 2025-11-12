@@ -97,5 +97,11 @@ public abstract class BaseUserController {
     public String getProfile() {
         return UserFormatter.formatProfile(user);
     }
+
+    public abstract List<String> listInternships();
+    public abstract List<Internship> getInternships();
+    public abstract void editProfile(String... fields);
+
+
 }
 
