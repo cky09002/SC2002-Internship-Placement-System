@@ -17,4 +17,8 @@ public interface CsvHandler {
         }
         return s;
     }
+
+    void loadFromCsv();
+    void saveToCsv(Object obj);
+    String formatCsvLine(Object obj);
 }
