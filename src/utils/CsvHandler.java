@@ -1,20 +1,30 @@
 package Assignment.src.utils;
 
 /**
- * Base interface for CSV handlers to ensure consistency.
- * Promotes polymorphism and code reuse across CSV handlers.
+ * Generic CSV handler interface.
+ * Defines required operations for loading and saving model objects.
  */
-public interface CsvHandler {
+public interface CsvHandler<T> {
+
     /**
-     * Escape commas and quotes in CSV strings.
-     * Shared utility method for all CSV handlers.
+     * Load all model objects from the CSV file.
+     */
+    void loadFromCsv();
+
+    /**
+     * Save or update a model object in the CSV file.
+     */
+    void saveToCsv(T obj);
+
+    /**
+     * Escape helper shared across implementations.
      */
     static String escapeCSV(String s) {
         if (s == null) return "";
-        // For simplicity, just wrap in quotes if contains comma or newline
         if (s.contains(",") || s.contains("\n")) {
             return "\"" + s.replace("\"", "\"\"") + "\"";
         }
         return s;
     }
 }
+
