@@ -1,13 +1,15 @@
-# Sequence Diagram - Company Representative Registration Process
+# Sequence Diagram - Company Representative Registration Flow
 
 ## Overview
-This sequence diagram shows the complete flow of a Company Representative registration process, including registration, approval by Staff, and login capability.
+Complete flow: Registration → Staff Approval → Login
 
-## Sequence Diagram (Text Representation)
+---
+
+## Sequence Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│              COMPANY REPRESENTATIVE REGISTRATION PROCESS                    │
+│              COMPANY REPRESENTATIVE REGISTRATION → APPROVAL → LOGIN          │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
@@ -15,8 +17,9 @@ This sequence diagram shows the complete flow of a Company Representative regist
 │              │  │    ler       │  │  (Singleton) │  │   (Model)    │  │              │
 └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘
        │                 │                  │                 │                 │
-       │                 │                  │                 │                 │
-   [User wants to register as Company Rep]
+═══════════════════════════════════════════════════════════════════════════════════
+                    PHASE 1: REGISTRATION
+═══════════════════════════════════════════════════════════════════════════════════
        │                 │                  │                 │                 │
        │ 1. displayRegistrationForm()      │                 │                 │
        │────────────────>│                  │                 │                 │
@@ -30,9 +33,8 @@ This sequence diagram shows the complete flow of a Company Representative regist
        │────────────────>│                  │                 │                 │
        │                 │                  │                 │                 │
        │                 │ 4. validateEmail(email)            │                 │
-       │                 │─────────────────────────────────────────────────────────>│
        │                 │                  │                 │                 │
-       │                 │ 5. findById(email)                 │                 │
+       │                 │ 5. findById(email)                │                 │
        │                 │────────────────>│                 │                 │
        │                 │                  │                 │                 │
        │                 │ 6. user not found                 │                 │
@@ -48,16 +50,16 @@ This sequence diagram shows the complete flow of a Company Representative regist
        │                 │    status = PENDING               │                 │
        │                 │<───────────────────────────────────│                 │
        │                 │                  │                 │                 │
-       │                 │ 9. register(compRep)              │                 │
+       │                 │ 9. register(compRep)             │                 │
        │                 │────────────────>│                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 10. users.put(email, compRep)    │                 │
+       │                 │ 10. users.put(email, compRep)     │                 │
        │                 │<────────────────│                 │                 │
        │                 │                  │                 │                 │
        │                 │ 11. saveCompanyRepToCsv(compRep)  │                 │
        │                 │────────────────>│                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 12. write to CSV file            │                 │
+       │                 │ 12. write to CSV file             │                 │
        │                 │                  │                 │                 │
        │                 │ 13. return true                   │                 │
        │                 │<────────────────│                 │                 │
@@ -66,12 +68,9 @@ This sequence diagram shows the complete flow of a Company Representative regist
        │     Pending approval message       │                 │                 │
        │<────────────────│                  │                 │                 │
        │                 │                  │                 │                 │
-       │                 │                  │                 │                 │
-   [Staff logs in and views pending Company Reps]
-       │                 │                  │                 │                 │
-       │                 │                  │                 │                 │
-       │                 │                  │                 │                 │
-       │                 │                  │                 │                 │
+═══════════════════════════════════════════════════════════════════════════════════
+                    PHASE 2: STAFF APPROVAL
+═══════════════════════════════════════════════════════════════════════════════════
        │                 │                  │                 │                 │
        │ 15. displayPendingCompanyReps()   │                 │                 │
        │──────────────────────────────────────────────────────────────────────>│
@@ -93,136 +92,112 @@ This sequence diagram shows the complete flow of a Company Representative regist
        │ 21. display list                  │                 │                 │
        │──────────────────────────────────────────────────────────────────────>│
        │                 │                  │                 │                 │
-   [Staff selects a Company Rep and approves]
-       │                 │                  │                 │                 │
        │ 22. approveRejectCompanyRep(repID,│                 │                 │
        │     true)                          │                 │                 │
        │────────────────>│                  │                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 23. approveRejectCompanyRep(      │                 │
-       │                 │     repID, true)                  │                 │
-       │                 │────────────────>│                  │                 │
-       │                 │                  │                 │                 │
-       │                 │ 24. findById(repID)               │                 │
+       │                 │ 23. findById(repID)               │                 │
        │                 │────────────────>│                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 25. return CompanyRep             │                 │
+       │                 │ 24. return CompanyRep             │                 │
        │                 │<────────────────│                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 26. setApproved(true)              │                 │
+       │                 │ 25. setApprovalStatus(APPROVED)   │                 │
        │                 │───────────────────────────────────>│                 │
        │                 │                  │                 │                 │
-       │                 │ 27. status = APPROVED              │                 │
+       │                 │ 26. status = APPROVED              │                 │
        │                 │                  │                 │                 │
-       │                 │ 28. updateCompanyRepStatusInCsv(  │                 │
+       │                 │ 27. updateCompanyRepStatusInCsv(  │                 │
        │                 │     compRep)                       │                 │
        │                 │────────────────>│                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 29. update CSV file              │                 │
+       │                 │ 28. update CSV file               │                 │
        │                 │                  │                 │                 │
-       │                 │ 30. return                       │                 │
+       │                 │ 29. return                       │                 │
        │                 │<────────────────│                 │                 │
        │                 │                  │                 │                 │
-       │ 31. return      │                  │                 │                 │
+       │ 30. return      │                  │                 │                 │
        │<────────────────│                  │                 │                 │
        │                 │                  │                 │                 │
-   [Company Rep attempts to login]
+═══════════════════════════════════════════════════════════════════════════════════
+                    PHASE 3: LOGIN
+═══════════════════════════════════════════════════════════════════════════════════
        │                 │                  │                 │                 │
-       │ 32. authenticate(email, password) │                 │                 │
+       │ 31. authenticate(email, password) │                 │                 │
        │────────────────>│                  │                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 33. findById(email)               │                 │
+       │                 │ 32. findById(email)               │                 │
        │                 │────────────────>│                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 34. return CompanyRep             │                 │
+       │                 │ 33. return CompanyRep             │                 │
        │                 │<────────────────│                 │                 │
        │                 │                  │                 │                 │
-       │                 │ 35. verifyPassword(password)     │                 │
+       │                 │ 34. verifyPassword(password)     │                 │
        │                 │───────────────────────────────────>│                 │
        │                 │                  │                 │                 │
-       │                 │ 36. password verified            │                 │
+       │                 │ 35. password verified            │                 │
        │                 │<───────────────────────────────────│                 │
        │                 │                  │                 │                 │
-       │                 │ 37. isApproved()                  │                 │
+       │                 │ 36. isApproved()                  │                 │
        │                 │───────────────────────────────────>│                 │
        │                 │                  │                 │                 │
-       │                 │ 38. return true                  │                 │
+       │                 │ 37. return true (APPROVED)        │                 │
        │                 │<───────────────────────────────────│                 │
        │                 │                  │                 │                 │
-       │                 │ 39. setLoggedIn(true)             │                 │
+       │                 │ 38. setLoggedIn(true)             │                 │
        │                 │───────────────────────────────────>│                 │
        │                 │                  │                 │                 │
-       │ 40. login successful, redirect   │                 │                 │
+       │ 39. login successful, redirect   │                 │                 │
        │     to CompanyRepDashboard        │                 │                 │
        │<────────────────│                  │                 │                 │
        │                 │                  │                 │                 │
 ```
 
-## Alternative Flow: Rejection
-
-If Staff rejects the Company Representative:
-
-```
-[Staff rejects Company Rep]
-       │                 │                  │                 │                 │
-       │ 22. approveRejectCompanyRep(repID,│                 │                 │
-       │     false)                         │                 │                 │
-       │────────────────>│                  │                 │                 │
-       │                 │                  │                 │                 │
-       │                 │ 23. approveRejectCompanyRep(      │                 │
-       │                 │     repID, false)                 │                 │
-       │                 │────────────────>│                  │                 │
-       │                 │                  │                 │                 │
-       │                 │ 24. findById(repID)               │                 │
-       │                 │────────────────>│                 │                 │
-       │                 │                  │                 │                 │
-       │                 │ 25. return CompanyRep             │                 │
-       │                 │<────────────────│                 │                 │
-       │                 │                  │                 │                 │
-       │                 │ 26. setApproved(false)            │                 │
-       │                 │───────────────────────────────────>│                 │
-       │                 │                  │                 │                 │
-       │                 │ 27. status = REJECTED             │                 │
-       │                 │                  │                 │                 │
-       │                 │ 28. updateCompanyRepStatusInCsv(  │                 │
-       │                 │     compRep)                       │                 │
-       │                 │────────────────>│                 │                 │
-       │                 │                  │                 │                 │
-       │                 │ 29. update CSV file               │                 │
-       │                 │                  │                 │                 │
-       │                 │ 30. return                       │                 │
-       │                 │<────────────────│                 │                 │
-       │                 │                  │                 │                 │
-       │ 31. return      │                  │                 │                 │
-       │<────────────────│                  │                 │                 │
-```
+---
 
 ## Key Interactions
 
-### 1. Registration Phase
-- **LoginView** → **LoginController**: Initiates registration
-- **LoginController** → **UserRegistry**: Checks if email exists
-- **LoginController** → **CompanyRepresentative**: Creates new instance with PENDING status
-- **UserRegistry**: Stores in memory and CSV file
+### Phase 1: Registration
+1. **LoginView** → **LoginController**: Initiates registration
+2. **LoginController** → **UserRegistry**: Checks if email exists
+3. **LoginController** → **CompanyRepresentative**: Creates instance with `PENDING` status
+4. **UserRegistry**: Stores in memory
+5. **UserCsvHandler**: Saves to CSV file
 
-### 2. Approval Phase
-- **StaffView** → **StaffController**: Requests pending company reps
-- **StaffController** → **LoginController**: Gets company rep list
-- **LoginController** → **UserRegistry**: Retrieves and filters pending reps
-- **Staff** approves/rejects → **CompanyRepresentative**: Status updated
-- **UserRegistry**: Updates CSV file
+### Phase 2: Approval
+1. **StaffView** → **StaffController**: Requests pending company reps
+2. **StaffController** → **LoginController**: Gets company rep list
+3. **LoginController** → **UserRegistry**: Retrieves and filters pending reps
+4. **Staff** approves → **CompanyRepresentative**: Status updated to `APPROVED`
+5. **UserCsvHandler**: Updates CSV file
 
-### 3. Login Phase
-- **LoginView** → **LoginController**: Authentication attempt
-- **LoginController** → **UserRegistry**: Finds company rep
-- **LoginController** → **CompanyRepresentative**: Checks approval status
-- If approved: Login successful, else: Login denied
+### Phase 3: Login
+1. **LoginView** → **LoginController**: Authentication attempt
+2. **LoginController** → **UserRegistry**: Finds company rep
+3. **LoginController** → **CompanyRepresentative**: Verifies password and approval status
+4. If `APPROVED`: Login successful, access dashboard
+5. If `PENDING`/`REJECTED`: Login denied with error message
 
-## Notes
+---
 
-1. **Singleton Pattern**: UserRegistry ensures single instance across system
-2. **Status Management**: Company Rep status transitions: PENDING → APPROVED/REJECTED
-3. **CSV Persistence**: All changes persisted to CSV file immediately
-4. **Validation**: Email validation and duplicate check before registration
-5. **Security**: Only approved Company Reps can login after registration
+## Status Transitions
 
+```
+Registration:  [No Account] → [PENDING]
+Approval:      [PENDING] → [APPROVED] or [REJECTED]
+Login:         [APPROVED] → [Logged In]
+               [PENDING/REJECTED] → [Login Denied]
+```
+
+---
+
+## Design Patterns Used
+
+1. **Singleton Pattern**: `UserRegistry` ensures single instance
+2. **MVC Pattern**: Clear separation of concerns
+3. **Dependency Inversion**: Controllers depend on interfaces
+4. **Factory Pattern**: `UserFactory` creates User objects
+
+---
+
+**Last Updated**: 2025-11-18

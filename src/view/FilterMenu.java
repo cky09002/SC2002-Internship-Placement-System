@@ -1,9 +1,10 @@
-package Assignment.src.view;
+package view;
 
-import Assignment.src.utils.*;
-import Assignment.src.constant.*;
-import Assignment.src.constant.MenuConstants;
-import Assignment.src.constant.FilterConstants;
+import utils.filter.*;
+import utils.formatter.*;
+import constant.MenuConstants;
+import constant.FilterConstants;
+import constant.InternshipStatus;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -19,18 +20,29 @@ import java.util.function.Supplier;
  * Promotes code reuse across different views.
  */
 public class FilterMenu {
+    /** Scanner for user input */
     private static final Scanner sc = new Scanner(System.in);
+    
+    /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class with only static methods.
+     */
+    private FilterMenu() {
+        throw new AssertionError("Utility class should not be instantiated");
+    }
     
     /**
      * Show filter menu and allow user to set filter options
      * @param filterSettings Filter settings to modify
      * @param getAllInternships Supplier function to get all internships (for MVC compliance - goes through controller)
      * @param detailGetter Function to get internship details (for preview)
+     * @param statusOptions Array of status filter options for this user type
      * Uses raw Supplier to avoid importing model classes in view layer while maintaining type compatibility
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     public static void showFilterMenu(FilterSettings filterSettings, Supplier getAllInternships, 
-                                     java.util.function.Function<Integer, String> detailGetter) {
+                                     java.util.function.Function<Integer, String> detailGetter,
+                                     String[] statusOptions) {
         while (true) {
             showFilterPreview(filterSettings, getAllInternships, detailGetter);
             
@@ -38,7 +50,7 @@ public class FilterMenu {
             ViewFormatter.displaySmallHeader("FILTER MENU", filterBorder, 120);
             System.out.println("  Current Filters: " + filterSettings.getFilterSummary());
             
-            Map<Integer, MenuOption> options = createFilterMenuOptions(filterSettings, getAllInternships);
+            Map<Integer, MenuOption> options = createFilterMenuOptions(filterSettings, getAllInternships, statusOptions);
             int[] choices = showFilterMenuDialog(options);
             
             if (choices.length == 0) continue;
@@ -77,25 +89,39 @@ public class FilterMenu {
         }
     }
     
-    // Thread-local flag to skip Enter prompts during batch operations
+    /** Thread-local flag to skip Enter prompts during batch operations */
     private static final ThreadLocal<Boolean> skipEnterPrompt = ThreadLocal.withInitial(() -> false);
     
+    /**
+     * Sets whether to skip Enter prompts.
+     * @param skip true to skip prompts, false otherwise
+     */
     private static void setSkipEnterPrompt(boolean skip) {
         skipEnterPrompt.set(skip);
     }
     
+    /**
+     * Checks if Enter prompts should be skipped.
+     * @return true if prompts should be skipped, false otherwise
+     */
     private static boolean shouldSkipEnterPrompt() {
         return skipEnterPrompt.get();
     }
     
     /**
-     * Create filter menu options using MenuOption pattern
+     * Creates filter menu options using MenuOption pattern.
+     * Builds a map of menu choices to their corresponding filter actions.
+     * 
+     * @param filterSettings The filter settings to modify
+     * @param getAllInternships Supplier function to get all internships
+     * @param statusOptions Array of status filter options for this user type
+     * @return Map of menu option numbers to MenuOption objects
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static Map<Integer, MenuOption> createFilterMenuOptions(FilterSettings filterSettings, Supplier getAllInternships) {
+    @SuppressWarnings({"rawtypes"})
+    private static Map<Integer, MenuOption> createFilterMenuOptions(FilterSettings filterSettings, Supplier getAllInternships, String[] statusOptions) {
         Map<Integer, MenuOption> options = new HashMap<>();
         options.put(1, new MenuOption("Filter by Status", () -> 
-            filterStatus(filterSettings, InternshipFilter.getStatusOptions())));
+            filterStatus(filterSettings, statusOptions)));
         options.put(2, new MenuOption("Filter by Major", () -> {
             List<?> currentInternships = (List<?>) getAllInternships.get();
             filterFromList(filterSettings, "Major", "All (clear filter)", 
@@ -114,7 +140,9 @@ public class FilterMenu {
         }));
         options.put(7, new MenuOption("Filter by Keyword", () -> filterByKeyword(filterSettings)));
         options.put(8, new MenuOption("Set Sort Order", () -> setSortOrder(filterSettings)));
-        options.put(9, new MenuOption("Reset All Filters", () -> {
+        options.put(9, new MenuOption("View Current Filters", () -> viewFilterDetails(filterSettings)));
+        options.put(10, new MenuOption("Reset All Filters", () -> {
+            showCurrentFilters(filterSettings);
             filterSettings.reset();
             showSuccess("All filters reset");
             waitForEnter();
@@ -124,6 +152,13 @@ public class FilterMenu {
         return options;
     }
     
+    /**
+     * Displays filter menu and gets user's comma-separated choices.
+     * Supports multiple selections for batch filter operations.
+     * 
+     * @param options Map of menu options to display
+     * @return Array of selected menu option numbers
+     */
     private static int[] showFilterMenuDialog(Map<Integer, MenuOption> options) {
         options.entrySet().stream()
             .sorted((a, b) -> a.getKey() == MenuConstants.MENU_CHOICE_CANCEL ? 1 : (b.getKey() == MenuConstants.MENU_CHOICE_CANCEL ? -1 : Integer.compare(a.getKey(), b.getKey())))
@@ -143,18 +178,44 @@ public class FilterMenu {
         return valid.stream().mapToInt(i -> i).toArray();
     }
     
+    /**
+     * Displays an error message.
+     * Skips Enter prompt during batch operations.
+     * 
+     * @param message The error message to display
+     */
     private static void showError(String message) {
         System.out.println("  ✗ " + message);
         if (!shouldSkipEnterPrompt()) waitForEnter();
     }
     
+    /**
+     * Displays a range validation error.
+     * 
+     * @param maxValue The maximum valid value
+     */
     private static void showRangeError(int maxValue) { showError("Invalid! Range: 0-" + maxValue); }
     
+    /**
+     * Parses a date string in YYYY-MM-DD format.
+     * 
+     * @param input The date string to parse
+     * @return Parsed LocalDate or null if invalid format
+     */
     private static LocalDate parseDate(String input) {
         try { return LocalDate.parse(input.trim()); }
         catch (DateTimeParseException e) { return null; }
     }
     
+    /**
+     * Displays a menu with numbered options and gets user choice.
+     * 
+     * @param title The menu title
+     * @param options Array of menu option labels
+     * @param prompt The selection prompt
+     * @param maxValue Maximum valid option number (unused but kept for consistency)
+     * @return The selected option number or -1 if invalid
+     */
     private static int displayMenuAndGetChoice(String title, String[] options, String prompt, int maxValue) {
         System.out.println("\n  " + title);
         for (int i = 0; i < options.length; i++) System.out.printf("  %d. %s%n", i + 1, options[i]);
@@ -162,6 +223,15 @@ public class FilterMenu {
         try { return Integer.parseInt(sc.nextLine().trim()); } catch (Exception e) { return -1; }
     }
     
+    /**
+     * Displays a menu from a dynamic list and gets user choice.
+     * 
+     * @param title The menu title
+     * @param clearOption The label for clear/reset option
+     * @param items List of menu items
+     * @param prompt The selection prompt
+     * @return The selected option number or -1 if invalid
+     */
     private static int displayListMenuAndGetChoice(String title, String clearOption, List<String> items, String prompt) {
         System.out.println("\n  " + title + ":\n  " + MenuConstants.MENU_CHOICE_CANCEL + ". " + clearOption);
         for (int i = 0; i < items.size(); i++) System.out.printf("  %d. %s%n", i + 1, items.get(i));
@@ -169,10 +239,23 @@ public class FilterMenu {
         try { return Integer.parseInt(sc.nextLine().trim()); } catch (Exception e) { return -1; }
     }
     
+    /**
+     * Displays a success message.
+     * Skips display during batch operations.
+     * 
+     * @param message The success message to display
+     */
     private static void showSuccess(String message) {
         if (!shouldSkipEnterPrompt()) System.out.println("  ✓ " + message);
     }
     
+    /**
+     * Handles date filter input and updates filter settings.
+     * 
+     * @param settings The filter settings to modify
+     * @param name The filter name (e.g., "Opening Date")
+     * @param setter The setter function to apply the date filter
+     */
     private static void filterByDate(FilterSettings settings, String name, java.util.function.Consumer<LocalDate> setter) {
         System.out.println("\n  Filter by " + name);
         System.out.print("  Enter " + (name.contains("Opening") ? "min" : "max") + " date (YYYY-MM-DD) or 'clear': ");
@@ -190,6 +273,13 @@ public class FilterMenu {
         waitForEnter();
     }
     
+    /**
+     * Handles status filter selection.
+     * Supports both enum-based and string-based status filters (AVAILABLE/FILLED).
+     * 
+     * @param settings The filter settings to modify
+     * @param options Array of status options to display
+     */
     private static void filterStatus(FilterSettings settings, String[] options) {
         int choice = displayMenuAndGetChoice("Filter by Status", options, "Select (0=clear): ", options.length);
         if (choice == MenuConstants.INVALID_CHOICE) { showError("Invalid input!"); return; }
@@ -219,6 +309,16 @@ public class FilterMenu {
         waitForEnter();
     }
     
+    /**
+     * Handles enum-based filter selection (generic for level/status).
+     * 
+     * @param settings The filter settings to modify
+     * @param name The filter name
+     * @param options Array of option labels
+     * @param statusSetter Setter for InternshipStatus (can be null for non-status filters)
+     * @param offset Index offset for mapping (can be null)
+     * @param statusValues Array of enum values (can be null for non-enum filters)
+     */
     private static void filterEnum(FilterSettings settings, String name, String[] options,
                                    Consumer<InternshipStatus> statusSetter, Integer offset,
                                    InternshipStatus[] statusValues) {
@@ -245,6 +345,16 @@ public class FilterMenu {
         waitForEnter();
     }
     
+    /**
+     * Handles filter selection from a dynamic list (e.g., majors, companies).
+     * 
+     * @param settings The filter settings to modify
+     * @param name The filter name
+     * @param clearOption Label for clear option
+     * @param items List of items to select from
+     * @param setter The setter function to apply the filter
+     * @param clearAction Action to run when clearing (can be null)
+     */
     private static void filterFromList(FilterSettings settings, String name, String clearOption,
                                       List<String> items, Consumer<String> setter, Runnable clearAction) {
         int choice = displayListMenuAndGetChoice("Filter by " + name, clearOption, items, "Select (0=clear): ");
@@ -259,9 +369,25 @@ public class FilterMenu {
         waitForEnter();
     }
     
+    /**
+     * Handles opening date filter input.
+     * 
+     * @param settings The filter settings to modify
+     */
     private static void filterByOpeningDate(FilterSettings settings) { filterByDate(settings, "Opening Date", settings::setOpeningDateFilter); }
+    /**
+     * Handles closing date filter input.
+     * 
+     * @param settings The filter settings to modify
+     */
     private static void filterByClosingDate(FilterSettings settings) { filterByDate(settings, "Closing Date", settings::setClosingDateFilter); }
     
+    /**
+     * Handles keyword filter input.
+     * Searches in title, description, and company name.
+     * 
+     * @param settings The filter settings to modify
+     */
     private static void filterByKeyword(FilterSettings settings) {
         System.out.println("\n  Filter by Keyword:");
         System.out.print("  Enter keyword or 'clear': ");
@@ -276,6 +402,11 @@ public class FilterMenu {
         waitForEnter();
     }
     
+    /**
+     * Handles sort order selection.
+     * 
+     * @param settings The filter settings to modify
+     */
     private static void setSortOrder(FilterSettings settings) {
         String[] orders = {"ALPHABETICAL", "ID", "CLOSING_DATE", "OPENING_DATE", "COMPANY", "LEVEL"};
         String[] labels = {"Alphabetical", "ID", "Closing Date", "Opening Date", "Company", "Level"};
@@ -286,7 +417,15 @@ public class FilterMenu {
         waitForEnter();
     }
     
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    /**
+     * Displays a preview of filtered results (first few items).
+     * Shows quick overview without pagination.
+     * 
+     * @param filterSettings Current filter settings
+     * @param getAllInternships Supplier function to get all internships
+     * @param detailGetter Function to get internship details (unused in preview)
+     */
+    @SuppressWarnings({"rawtypes"})
     private static void showFilterPreview(FilterSettings filterSettings, Supplier getAllInternships,
                                          java.util.function.Function<Integer, String> detailGetter) {
         List<?> filtered = (List<?>) InternshipFilter.applyFilters((java.util.List<?>) getAllInternships.get(), filterSettings);
@@ -296,7 +435,15 @@ public class FilterMenu {
             (obj, num) -> InternshipFormatter.formatTableRowFromObject(obj, num, false), headers, MenuConstants.MENU_CHOICE_CLEAR + 4);
     }
     
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    /**
+     * Displays a full paginated preview of filtered results.
+     * Allows detailed browsing of filter results.
+     * 
+     * @param filterSettings Current filter settings
+     * @param getAllInternships Supplier function to get all internships
+     * @param detailGetter Function to get internship details
+     */
+    @SuppressWarnings({"rawtypes"})
     private static void showFullPreview(FilterSettings filterSettings, Supplier getAllInternships,
                                        java.util.function.Function<Integer, String> detailGetter) {
         List<?> filtered = (List<?>) InternshipFilter.applyFilters((java.util.List<?>) getAllInternships.get(), filterSettings);
@@ -308,6 +455,35 @@ public class FilterMenu {
             headers, null, null, null, null, null, sc, BaseView.BORDER, BaseView.WIDTH);
     }
     
+    /**
+     * Displays detailed view of current filter settings using FilterFormatter.
+     * Shows all filter states with formatted output.
+     * 
+     * @param settings The filter settings to display
+     */
+    private static void viewFilterDetails(FilterSettings settings) {
+        FilterFormatter formatter = new FilterFormatter("Current Filter Configuration", false);
+        System.out.println(formatter.format(settings));
+        waitForEnter();
+    }
+    
+    /**
+     * Displays active filters only using FilterFormatter.
+     * Used before reset to show what will be cleared.
+     * 
+     * @param settings The filter settings to display
+     */
+    private static void showCurrentFilters(FilterSettings settings) {
+        if (settings.hasActiveFilters()) {
+            FilterFormatter formatter = new FilterFormatter("Filters to be reset", true);
+            System.out.println(formatter.format(settings));
+        }
+    }
+    
+    /**
+     * Waits for user to press Enter before continuing.
+     * Delegates to ViewFormatter utility.
+     */
     private static void waitForEnter() {
         if (!shouldSkipEnterPrompt()) {
             ViewFormatter.waitForEnter(sc);

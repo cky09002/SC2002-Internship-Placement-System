@@ -5,12 +5,12 @@ This document outlines all 22 test cases for the Internship Management System. T
 
 **Run automated tests:**
 ```bash
-java -cp out Assignment.src.test.TestRunner
+java -cp bin test.TestRunner
 ```
 
 **Run application for manual testing:**
 ```bash
-java -cp out Assignment.src.MainApp
+java -cp bin MainApp
 ```
 
 ---

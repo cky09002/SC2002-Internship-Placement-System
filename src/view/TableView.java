@@ -1,7 +1,8 @@
-package Assignment.src.view;
+package view;
 
-import Assignment.src.utils.*;
-import Assignment.src.constant.MenuConstants;
+import utils.filter.*;
+import utils.formatter.*;
+import constant.MenuConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -15,27 +16,35 @@ import java.util.function.Function;
 public class TableView {
     
     /**
-     * Display paginated table with headers and navigation.
-     * @param items List of items to display
-     * @param header Table header
-     * @param emptyMsg Empty message
-     * @param detailGetter Function to get details by ID
-     * @param rowFormatter Function to format each row: (item, displayNumber) -> String[]
-     * @param getID Function to extract ID from item
-     * @param tableHeaders Table column headers
-     * @param filterSettings Filter settings (can be null)
-     * @param onAction Action callback (can be null) - single action with 'A' prefix
-     * @param actionPrompt Action prompt (can be null)1
-     * 
-     * @param actions Map of action codes to action callbacks (e.g., 'A' -> accept, 'W' -> withdraw)
-     * @param actionPrompts Map of action codes to action prompts (e.g., 'A' -> "accept", 'W' -> "withdraw")
-     * @param sc Scanner
-     * @param border Border string
-     * @param width Width
-     * @return true if filter requested, false otherwise
+     * Default constructor for TableView.
      */
-    @SuppressWarnings("unchecked")
-    public static boolean displayPaginatedTable(List<?> items, String header, String emptyMsg,
+    public TableView() {
+        // Default constructor
+    }
+    
+    /**
+     * Displays a paginated table with headers, navigation, and interactive actions.
+     * Supports detail viewing, filtering, and custom actions on table items.
+     * Main method with all parameters - other overloads delegate to this.
+     * 
+     * @param items List of items to display in the table
+     * @param header Table header title
+     * @param emptyMsg Message to display when list is empty
+     * @param detailGetter Function to retrieve detailed view by ID
+     * @param rowFormatter Function to format each row: (item, displayNumber) -&gt; String[]
+     * @param getID Function to extract ID from item object
+     * @param tableHeaders Array of column header labels
+     * @param filterSettings Current filter settings (null if filtering not supported)
+     * @param onAction Single action callback (deprecated - use actions map instead)
+     * @param actionPrompt Single action prompt (deprecated - use actionPrompts map instead)
+     * @param actions Map of action codes to callbacks (e.g., "A" -&gt; approve, "W" -&gt; withdraw)
+     * @param actionPrompts Map of action codes to display prompts (e.g., "A" -&gt; "approve")
+     * @param sc Scanner for reading user input
+     * @param border Border string for visual separation
+     * @param width Display width for formatting
+     * @return 0=exit, 1=action executed, 2=filter requested
+     */
+    public static int displayPaginatedTable(List<?> items, String header, String emptyMsg,
                                                Function<Integer, String> detailGetter,
                                                BiFunction<Object, Integer, String[]> rowFormatter,
                                                Function<Object, Integer> getID,
@@ -53,8 +62,8 @@ public class TableView {
             System.out.println("\n  Press " + (filterSettings != null ? "'" + MenuConstants.TABLE_CMD_FILTER + "' to modify filters, or " : "") + "'" + MenuConstants.TABLE_CMD_BACK + "' to go back to menu.");
             System.out.print("  Enter your choice: ");
             String input = sc.nextLine().trim().toUpperCase();
-            if (filterSettings != null && input.equals(MenuConstants.TABLE_CMD_FILTER)) return true;
-            return false;
+            if (filterSettings != null && input.equals(MenuConstants.TABLE_CMD_FILTER)) return 2;
+            return 0;
         }
         
         int itemsPerPage = 10;
@@ -123,23 +132,52 @@ public class TableView {
             
             String input = sc.nextLine().trim().toUpperCase();
             
-            if (input.equals(MenuConstants.TABLE_CMD_BACK)) return false;
-            if (filterSettings != null && input.equals(MenuConstants.TABLE_CMD_FILTER)) return true;
+            if (input.equals(MenuConstants.TABLE_CMD_BACK)) return 0;
+            if (filterSettings != null && input.equals(MenuConstants.TABLE_CMD_FILTER)) {
+                return 2; // Return 2 to signal filter menu request (distinct from action execution)
+            }
             if (input.equals(MenuConstants.TABLE_CMD_NEXT) && currentPage < totalPages) currentPage++;
             else if (input.equals(MenuConstants.TABLE_CMD_PREV) && currentPage > 1) currentPage--;
             else if (tableHeaders != null && input.startsWith(MenuConstants.TABLE_CMD_DETAIL) && input.length() > 1) {
                 int index = ViewFormatter.parseInt(input.substring(1), items.size()) - 1;
                 if (index >= 0 && index < items.size()) {
-                    System.out.println(detailGetter.apply(getID.apply(items.get(index))));
-                    // Show back option menu
+                    Integer selectedID = getID.apply(items.get(index));
+                    System.out.println(detailGetter.apply(selectedID));
+                    
+                    // Show options menu after viewing details
                     System.out.println("\n" + border);
                     System.out.println("  Options:");
+                    if (onAction != null && actionPrompt != null) {
+                        System.out.println("  - Press Enter to " + actionPrompt);
+                    }
+                    if (actions != null && !actions.isEmpty()) {
+                        for (java.util.Map.Entry<String, String> entry : actionPrompts.entrySet()) {
+                            System.out.println("  - Enter '" + entry.getKey() + "' to " + entry.getValue());
+                        }
+                    }
                     System.out.println("  - Enter '" + MenuConstants.TABLE_CMD_BACK + "' to go back to table");
                     System.out.println(border);
                     System.out.print("  Enter your choice: ");
-                    String backInput = sc.nextLine().trim().toUpperCase();
-                    if (!backInput.equals(MenuConstants.TABLE_CMD_BACK)) {
-                        // If not back, just continue (re-display table)
+                    
+                    String choice = sc.nextLine().trim().toUpperCase();
+                    if (!choice.equals(MenuConstants.TABLE_CMD_BACK)) {
+                        if (choice.isEmpty() && onAction != null) {
+                            // Enter pressed - execute onAction
+                            try {
+                                onAction.accept(selectedID);
+                            } catch (Exception e) {
+                                System.out.println("  Error: " + e.getMessage());
+                                ViewFormatter.waitForEnter(sc);
+                            }
+                        } else if (actions != null && actions.containsKey(choice)) {
+                            // Execute the selected action
+                            try {
+                                actions.get(choice).accept(selectedID);
+                            } catch (Exception e) {
+                                System.out.println("  Error: " + e.getMessage());
+                                ViewFormatter.waitForEnter(sc);
+                            }
+                        }
                     }
                 } else {
                     System.out.println("  Invalid number!");
@@ -154,7 +192,7 @@ public class TableView {
                     if (index >= 0 && index < items.size()) {
                         try {
                             action.accept(getID.apply(items.get(index)));
-                            // Action completed - continue to refresh table (no extra prompt)
+                            return 1; // Return 1 to signal action executed (needs refresh, but not filter menu)
                         } catch (Exception e) {
                             System.out.println("  Error: " + e.getMessage());
                             ViewFormatter.waitForEnter(sc);
@@ -187,9 +225,9 @@ public class TableView {
                 // Fallback to single action for backward compatibility (using A for approve)
                 int index = ViewFormatter.parseInt(input.substring(1), items.size()) - 1;
                 if (index >= 0 && index < items.size()) {
-                        try {
-                            onAction.accept(getID.apply(items.get(index)));
-                            // Action completed - continue to refresh table (no extra prompt)
+                    try {
+                        onAction.accept(getID.apply(items.get(index)));
+                        return 1; // Return 1 to signal action executed
                     } catch (Exception e) {
                         System.out.println("  Error: " + e.getMessage());
                         ViewFormatter.waitForEnter(sc);
@@ -202,16 +240,7 @@ public class TableView {
                 int index = ViewFormatter.parseInt(input, items.size()) - 1;
                 if (index >= 0 && index < items.size()) {
                     System.out.println(detailGetter.apply(getID.apply(items.get(index))));
-                    // Show back option menu
-                    System.out.println("\n" + border);
-                    System.out.println("  Options:");
-                    System.out.println("  - Enter '" + MenuConstants.TABLE_CMD_BACK + "' to go back to table");
-                    System.out.println(border);
-                    System.out.print("  Enter your choice: ");
-                    String backInput = sc.nextLine().trim().toUpperCase();
-                    if (!backInput.equals(MenuConstants.TABLE_CMD_BACK)) {
-                        // If not back, just continue (re-display table)
-                    }
+                    ViewFormatter.waitForEnter(sc);
                 } else {
                     System.out.println("  Invalid choice!");
                     ViewFormatter.waitForEnter(sc);
@@ -222,6 +251,12 @@ public class TableView {
     
     /**
      * Display simple table preview (first N items) - uses small header for filters.
+     * @param items list of items to display
+     * @param header table header text
+     * @param emptyMsg message to show when no results
+     * @param rowFormatter function to format each row
+     * @param tableHeaders table column headers
+     * @param maxPreviewItems maximum number of items to show
      */
     public static void displayPreviewTable(List<?> items, String header, String emptyMsg,
                                           BiFunction<Object, Integer, String[]> rowFormatter,
