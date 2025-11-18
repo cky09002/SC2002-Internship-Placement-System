@@ -9,6 +9,7 @@ Refactoring to ensure strict MVC architecture, SOLID principles, and OOP best pr
 ### New Classes
 - **`UserCsvHandler`** - Handles all user persistence (moved from `UserRegistry`)
 - **`CsvDeletable`** - Interface for CSV handlers supporting deletion
+- **`FilterOptionsProvider`** - Interface for providing user-type-specific filter options (ISP compliance)
 
 ### Modified Classes
 
@@ -20,12 +21,15 @@ Refactoring to ensure strict MVC architecture, SOLID principles, and OOP best pr
 
 **Controller Layer:**
 - **`ApplicationController`** - Uses `InternshipReader` and `InternshipWriter` interfaces (ISP)
-- **`BaseUserController`** - Uses `InternshipValidator` interface (ISP)
+- **`BaseUserController`** - Uses `InternshipValidator` interface (ISP), implements `FilterOptionsProvider`
 - **`LoginController`** - Uses `UserCsvHandlerInterface` (DIP)
+- **`StudentController/StaffController/CompanyRepresentativeController`** - Implement `getStatusFilterOptions()` for user-specific filter options
 - All controllers now use constructor injection with interfaces
 
 **View Layer:**
 - **`ViewFactory`** - Uses factory method pattern instead of `instanceof` checks
+- **`BaseView`** - Uses `FilterOptionsProvider` interface instead of user type enum (DIP compliance)
+- **`FilterMenu`** - Accepts status options array from provider instead of user type
 
 ---
 
@@ -149,6 +153,7 @@ return user.createDashboardStrategy();
 - `src/utils/csv/UserCsvHandler.java`
 - `src/utils/csv/UserCsvHandlerInterface.java`
 - `src/utils/csv/CsvDeletable.java`
+- `src/utils/filter/FilterOptionsProvider.java`
 - `src/controller/interfaces/*` (6 interface files)
 
 **Modified Files:**
@@ -162,5 +167,26 @@ return user.createDashboardStrategy();
 
 ---
 
+## Filter Options Provider (ISP/DIP Compliance)
+
+**Problem:** Filter options were determined by user type enum, violating OCP (adding new user types required modifying filter logic).
+
+**Solution:** Created `FilterOptionsProvider` interface:
+- `BaseUserController` implements `FilterOptionsProvider`
+- Each controller subclass provides its own filter options via `getStatusFilterOptions()`
+- Views get options from controller (polymorphism), not from user type enum
+
+**Impact on Sequence Diagrams:**
+- `BaseView.handleFilterMenu()` → `getFilterOptionsProvider().getStatusFilterOptions()`
+- Each view subclass returns its controller as `FilterOptionsProvider`
+- `FilterMenu` receives status options array (not user type enum)
+
+**Filter Options by User Type:**
+- **Students**: "All", "Available", "Filled"
+- **Company Representatives**: "All", "PENDING", "APPROVED", "REJECTED", "Available", "Filled"
+- **Staff**: "All", "PENDING", "APPROVED", "REJECTED"
+
+---
+
 **Last Updated:** 2025-11-18  
-**Version:** 2.0
+**Version:** 2.1

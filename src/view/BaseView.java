@@ -211,10 +211,18 @@ public abstract class BaseView {
      * @param filterSettings The current filter settings
      * @param internships The list of internships to filter
      * @param getAllInternships Supplier function to get all internships
+     * @param statusOptions Array of status filter options for this user type
      */
-    protected void handleFilterMenu(FilterSettings filterSettings, List<?> internships, Supplier<List<?>> getAllInternships) {
-        FilterMenu.showFilterMenu(filterSettings, getAllInternships, this::getInternshipDetailsForFilter);
+    protected void handleFilterMenu(FilterSettings filterSettings, List<?> internships, Supplier<List<?>> getAllInternships, String[] statusOptions) {
+        FilterMenu.showFilterMenu(filterSettings, getAllInternships, this::getInternshipDetailsForFilter, statusOptions);
     }
+    
+    /**
+     * Gets the filter options provider from the controller.
+     * Must be implemented by subclasses to return their controller's FilterOptionsProvider.
+     * @return FilterOptionsProvider instance
+     */
+    protected abstract utils.filter.FilterOptionsProvider getFilterOptionsProvider();
     
     /**
      * Generic data display loop that automatically refreshes after actions.
@@ -275,7 +283,7 @@ public abstract class BaseView {
         showDataLoop(header, getInternships,
             (supplier, hdr) -> displayPaginatedInternshipTableWithRefresh(supplier, hdr, emptyMsg,
                 detailGetter, filterSettings, onAction, actionPrompt, actions, actionPrompts, showStatus),
-            filterSettings != null ? () -> handleFilterMenu(filterSettings, getInternships.get(), getInternships) : null);
+            filterSettings != null ? () -> handleFilterMenu(filterSettings, getInternships.get(), getInternships, getFilterOptionsProvider().getStatusFilterOptions()) : null);
     }
     
     /**
@@ -307,7 +315,7 @@ public abstract class BaseView {
             
             if (result == 2 && filterSettings != null) {
                 // Only show filter menu when user explicitly pressed 'F'
-                handleFilterMenu(filterSettings, data, dataSupplier);
+                handleFilterMenu(filterSettings, data, dataSupplier, getFilterOptionsProvider().getStatusFilterOptions());
             }
             // If result == 1, action was executed, just continue loop to refresh
         }
@@ -591,7 +599,7 @@ public abstract class BaseView {
      */
     protected void handleFilterInternships(FilterSettings filterSettings, 
                                          Supplier<List<?>> getAllInternships) {
-        handleFilterMenu(filterSettings, getAllInternships.get(), getAllInternships);
+        handleFilterMenu(filterSettings, getAllInternships.get(), getAllInternships, getFilterOptionsProvider().getStatusFilterOptions());
     }
     
     /**

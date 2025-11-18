@@ -204,5 +204,14 @@ public class StudentView extends BaseView {
         controller.acceptApplication(applicationID);
         System.out.println("Application accepted successfully!");
     }
+    
+    /**
+     * Gets the filter options provider from the controller.
+     * @return The controller as FilterOptionsProvider
+     */
+    @Override
+    protected utils.filter.FilterOptionsProvider getFilterOptionsProvider() {
+        return controller;
+    }
 
 }

@@ -36,11 +36,13 @@ public class FilterMenu {
      * @param filterSettings Filter settings to modify
      * @param getAllInternships Supplier function to get all internships (for MVC compliance - goes through controller)
      * @param detailGetter Function to get internship details (for preview)
+     * @param statusOptions Array of status filter options for this user type
      * Uses raw Supplier to avoid importing model classes in view layer while maintaining type compatibility
      */
     @SuppressWarnings({"rawtypes"})
     public static void showFilterMenu(FilterSettings filterSettings, Supplier getAllInternships, 
-                                     java.util.function.Function<Integer, String> detailGetter) {
+                                     java.util.function.Function<Integer, String> detailGetter,
+                                     String[] statusOptions) {
         while (true) {
             showFilterPreview(filterSettings, getAllInternships, detailGetter);
             
@@ -48,7 +50,7 @@ public class FilterMenu {
             ViewFormatter.displaySmallHeader("FILTER MENU", filterBorder, 120);
             System.out.println("  Current Filters: " + filterSettings.getFilterSummary());
             
-            Map<Integer, MenuOption> options = createFilterMenuOptions(filterSettings, getAllInternships);
+            Map<Integer, MenuOption> options = createFilterMenuOptions(filterSettings, getAllInternships, statusOptions);
             int[] choices = showFilterMenuDialog(options);
             
             if (choices.length == 0) continue;
@@ -112,13 +114,14 @@ public class FilterMenu {
      * 
      * @param filterSettings The filter settings to modify
      * @param getAllInternships Supplier function to get all internships
+     * @param statusOptions Array of status filter options for this user type
      * @return Map of menu option numbers to MenuOption objects
      */
     @SuppressWarnings({"rawtypes"})
-    private static Map<Integer, MenuOption> createFilterMenuOptions(FilterSettings filterSettings, Supplier getAllInternships) {
+    private static Map<Integer, MenuOption> createFilterMenuOptions(FilterSettings filterSettings, Supplier getAllInternships, String[] statusOptions) {
         Map<Integer, MenuOption> options = new HashMap<>();
         options.put(1, new MenuOption("Filter by Status", () -> 
-            filterStatus(filterSettings, InternshipFilter.getStatusOptions())));
+            filterStatus(filterSettings, statusOptions)));
         options.put(2, new MenuOption("Filter by Major", () -> {
             List<?> currentInternships = (List<?>) getAllInternships.get();
             filterFromList(filterSettings, "Major", "All (clear filter)", 

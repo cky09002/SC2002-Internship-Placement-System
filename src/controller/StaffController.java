@@ -140,4 +140,14 @@ public class StaffController extends BaseUserController {
         if (email != null && !email.trim().isEmpty()) staff.setEmail(email);
         if (department != null && !department.trim().isEmpty()) staff.setStaffDepartment(department);
     }
+    
+    /**
+     * Gets status filter options for staff.
+     * Staff see: "All", "PENDING", "APPROVED", "REJECTED"
+     * @return Array of status filter options
+     */
+    @Override
+    public String[] getStatusFilterOptions() {
+        return new String[]{"All", "PENDING", "APPROVED", "REJECTED"};
+    }
 }

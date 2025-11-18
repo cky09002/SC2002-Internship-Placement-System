@@ -3,6 +3,7 @@ package controller;
 import model.*;
 import constant.*;
 import utils.filter.FilterSettings;
+import utils.filter.FilterOptionsProvider;
 import utils.formatter.UserFormatter;
 import controller.interfaces.*;
 
@@ -21,7 +22,7 @@ import java.util.stream.Stream;
  * @version 1.0
  * @since 2025-11-16
  */
-public abstract class BaseUserController implements UserController {
+public abstract class BaseUserController implements UserController, FilterOptionsProvider {
     /** The user associated with this controller */
     protected final User user;
     /** Controller for managing internship operations */

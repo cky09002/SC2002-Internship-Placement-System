@@ -233,15 +233,6 @@ public class InternshipFilter {
                 .collect(Collectors.toList());
     }
     
-    /**
-     * Get available filter options for status.
-     * Shows "Available" and "Filled" for students/company reps.
-     * Shows PENDING, APPROVED, REJECTED for staff approve/reject workflow.
-     * @return array of status filter options
-     */
-    public static String[] getStatusOptions() {
-        return new String[]{"All", "Available", "Filled", "PENDING", "APPROVED", "REJECTED"};
-    }
     
     /**
      * Get available filter options for level.

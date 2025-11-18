@@ -141,6 +141,7 @@ Core class structure focusing on main features. Utility classes (formatters, fil
 
 ┌──────────────────────────────────────────────────┐
 │      BaseUserController (abstract)                │
+│   implements FilterOptionsProvider                │
 ├──────────────────────────────────────────────────┤
 │ - user: User                                      │
 │ # internshipController: InternshipControllerInterface│
@@ -151,6 +152,7 @@ Core class structure focusing on main features. Utility classes (formatters, fil
 │ + isLoggedIn(): boolean                          │
 │ + logout()                                       │
 │ + getProfile(): String                           │
+│ + getStatusFilterOptions(): String[] {abstract}  │
 └──────────────────────────────────────────────────┘
             ▲
             │
@@ -171,10 +173,15 @@ Core class structure focusing on main features. Utility classes (formatters, fil
 │ +accept  │  │  Reject │  │  Internship(...)     │
 │  Applicat│  │  Interns│  │ +confirmPlacement(...│
 │  ion(int)│  │  hip(...│  │ +toggleVisibility(...│
-│ +withdraw│  │ +getPend│  │                      │
-│  Applicat│  │  ingComp│  │                      │
+│ +withdraw│  │ +getPend│  │ +getStatusFilterOpt │
+│  Applicat│  │  ingComp│  │  ions(): String[]    │
 │  ion(...)│  │  anyReps│  │                      │
-└──────────┘  └─────────┘  └─────────────────────┘
+│ +getStatus│  │ +getStat│  │                      │
+│  FilterOpt│  │  usFilt │  │                      │
+│  ions():  │  │  erOpti │  │                      │
+│  String[] │  │  ons():  │  │                      │
+│           │  │  String[]│  │                      │
+└───────────┘  └─────────┘  └─────────────────────┘
 
 ┌──────────────────────────────────────────────────┐
 │      ApplicationController                        │
@@ -266,6 +273,13 @@ Core class structure focusing on main features. Utility classes (formatters, fil
 │         ViewFactory                               │
 ├──────────────────────────────────────────────────┤
 │ + createAndRunView(User): static void            │
+│ + createDashboardStrategy(User): static DashboardStrategy│
+└──────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────┐
+│      FilterOptionsProvider (interface)            │
+├──────────────────────────────────────────────────┤
+│ + getStatusFilterOptions(): String[]             │
 └──────────────────────────────────────────────────┘
 
 ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -314,8 +328,10 @@ Core class structure focusing on main features. Utility classes (formatters, fil
 - `Internship` → `Application` (1-to-many)
 - `Student` → `Application` (1-to-many)
 - `LoginController` → `UserRegistry`
+- `BaseUserController` → `FilterOptionsProvider` (implements)
 - All Controllers → Models (dependency)
 - All Views → Controllers (dependency)
+- `BaseView` → `FilterOptionsProvider` (via controller)
 
 ### Composition - ◆
 - `UserRegistry` ◆ `User` objects (Map<String, User>)

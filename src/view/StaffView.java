@@ -177,4 +177,13 @@ public class StaffView extends BaseView {
             "No internships available.", controller::getInternshipDetails,
             controller.getFilterSettings(), null, null, true);
     }
+    
+    /**
+     * Gets the filter options provider from the controller.
+     * @return The controller as FilterOptionsProvider
+     */
+    @Override
+    protected utils.filter.FilterOptionsProvider getFilterOptionsProvider() {
+        return controller;
+    }
 }

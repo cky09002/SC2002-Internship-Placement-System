@@ -152,4 +152,14 @@ public class StudentController extends BaseUserController {
         if (yearOfStudy != null) student.setYearOfStudy(yearOfStudy);
         if (major != null && !major.trim().isEmpty()) student.setMajor(major);
     }
+    
+    /**
+     * Gets status filter options for students.
+     * Students see: "All", "Available", "Filled"
+     * @return Array of status filter options
+     */
+    @Override
+    public String[] getStatusFilterOptions() {
+        return new String[]{"All", "Available", "Filled"};
+    }
 }

@@ -377,4 +377,13 @@ public class CompanyRepresentativeView extends BaseView {
         handleActionWithTwoIDs("  Enter internship ID: ", "Enter application ID: ",
             controller::confirmPlacement, "Application marked as successful! Student can now accept it.");
     }
+    
+    /**
+     * Gets the filter options provider from the controller.
+     * @return The controller as FilterOptionsProvider
+     */
+    @Override
+    protected utils.filter.FilterOptionsProvider getFilterOptionsProvider() {
+        return controller;
+    }
 }

@@ -115,6 +115,16 @@ public class CompanyRepresentativeController extends BaseUserController {
     }
     
     /**
+     * Gets status filter options for company representatives.
+     * Company Reps see: "All", "PENDING", "APPROVED", "REJECTED", "Available", "Filled"
+     * @return Array of status filter options
+     */
+    @Override
+    public String[] getStatusFilterOptions() {
+        return new String[]{"All", "PENDING", "APPROVED", "REJECTED", "Available", "Filled"};
+    }
+    
+    /**
      * Gets detailed information about a specific internship.
      * Only the owner can view internship details.
      * 
