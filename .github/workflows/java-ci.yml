@@ -45,8 +45,8 @@ jobs:
         if javac -d out -sourcepath src @javafiles.txt 2>&1; then
           echo "✅ Compilation successful"
           echo "Verifying compiled classes..."
-          test -f out/Assignment/src/MainApp.class && echo "✅ MainApp.class found" || echo "❌ MainApp.class missing"
-          test -f out/Assignment/src/InternshipApp.class && echo "✅ InternshipApp.class found" || echo "❌ InternshipApp.class missing"
+          test -f out/MainApp.class && echo "✅ MainApp.class found" || echo "❌ MainApp.class missing"
+          test -f out/InternshipApp.class && echo "✅ InternshipApp.class found" || echo "❌ InternshipApp.class missing"
           rm javafiles.txt
         else
           echo "❌ Compilation failed!"
@@ -79,23 +79,23 @@ jobs:
         )
         echo Compilation successful
         echo Verifying compiled classes...
-        if exist out\Assignment\src\MainApp.class (echo MainApp.class found) else (echo MainApp.class missing)
-        if exist out\Assignment\src\InternshipApp.class (echo InternshipApp.class found) else (echo InternshipApp.class missing)
+        if exist out\MainApp.class (echo MainApp.class found) else (echo MainApp.class missing)
+        if exist out\InternshipApp.class (echo InternshipApp.class found) else (echo InternshipApp.class missing)
         del javafiles.txt
 
     - name: Verify compilation (Unix)
       if: runner.os != 'Windows'
       shell: bash
       run: |
-        test -f out/Assignment/src/MainApp.class && echo "✅ MainApp compiled successfully" || (echo "❌ MainApp.class not found" && exit 1)
-        test -f out/Assignment/src/InternshipApp.class && echo "✅ InternshipApp compiled successfully" || (echo "❌ InternshipApp.class not found" && exit 1)
+        test -f out/MainApp.class && echo "✅ MainApp compiled successfully" || (echo "❌ MainApp.class not found" && exit 1)
+        test -f out/InternshipApp.class && echo "✅ InternshipApp compiled successfully" || (echo "❌ InternshipApp.class not found" && exit 1)
 
     - name: Verify compilation (Windows)
       if: runner.os == 'Windows'
       shell: cmd
       run: |
-        if exist out\Assignment\src\MainApp.class (echo ✅ MainApp compiled successfully) else (echo ❌ MainApp.class not found && exit /b 1)
-        if exist out\Assignment\src\InternshipApp.class (echo ✅ InternshipApp compiled successfully) else (echo ❌ InternshipApp.class not found && exit /b 1)
+        if exist out\MainApp.class (echo ✅ MainApp compiled successfully) else (echo ❌ MainApp.class not found && exit /b 1)
+        if exist out\InternshipApp.class (echo ✅ InternshipApp compiled successfully) else (echo ❌ InternshipApp.class not found && exit /b 1)
 
     - name: Check runtime errors - Verify MainApp class can load
       continue-on-error: true
@@ -104,8 +104,8 @@ jobs:
       run: |
         echo "Verifying MainApp and InternshipApp classes are accessible..."
         echo "Note: MainApp requires CSV files to run, so we only verify class files exist"
-        test -f out/Assignment/src/MainApp.class && echo "✅ MainApp.class verified" || echo "❌ MainApp.class missing"
-        test -f out/Assignment/src/InternshipApp.class && echo "✅ InternshipApp.class verified" || echo "❌ InternshipApp.class missing"
+        test -f out/MainApp.class && echo "✅ MainApp.class verified" || echo "❌ MainApp.class missing"
+        test -f out/InternshipApp.class && echo "✅ InternshipApp.class verified" || echo "❌ InternshipApp.class missing"
         echo "✅ Class loading verification complete (classes exist and are accessible)"
 
     - name: Verify CSV files exist
@@ -128,10 +128,10 @@ jobs:
         echo "Running TestRunner to check for runtime errors..."
         echo "Working directory: $(pwd)"
         if command -v timeout >/dev/null 2>&1; then
-          timeout 60s java -cp out Assignment.src.test.TestRunner 2>&1 | head -n 100 || echo "Note: TestRunner may require CSV files, but runtime errors are checked"
+          timeout 60s java -cp out test.TestRunner 2>&1 | head -n 100 || echo "Note: TestRunner may require CSV files, but runtime errors are checked"
         else
           echo "Running TestRunner (timeout not available, will check for immediate errors)..."
-          java -cp out Assignment.src.test.TestRunner 2>&1 | head -n 100 || echo "Note: TestRunner may require CSV files, but runtime errors are checked"
+          java -cp out test.TestRunner 2>&1 | head -n 100 || echo "Note: TestRunner may require CSV files, but runtime errors are checked"
         fi
 
     - name: Build summary
