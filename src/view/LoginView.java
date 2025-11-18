@@ -1,6 +1,6 @@
-package Assignment.src.view;
+package view;
 
-import Assignment.src.controller.*;
+import controller.*;
 import java.util.Scanner;
 
 /**
@@ -9,9 +9,16 @@ import java.util.Scanner;
  * MVC compliant: No model imports, returns user ID string instead of User object.
  */
 public class LoginView {
+    /** Scanner for reading user input */
     private static final Scanner sc = new Scanner(System.in);
+    /** The controller handling login and authentication logic */
     private LoginController controller;
     
+    /**
+     * Constructs a new LoginView with the specified controller.
+     * 
+     * @param controller The login controller handling authentication logic
+     */
     public LoginView(LoginController controller) {
         this.controller = controller;
     }
@@ -24,6 +31,12 @@ public class LoginView {
         System.out.println("\n=== Login ===");
         System.out.print("Enter user ID: ");
         String userID = sc.nextLine().trim();
+        
+        // Check if user ID exists first
+        if (!controller.userExists(userID)) {
+            System.out.println("Error: User ID not found. Please check your user ID and try again.");
+            return null;
+        }
         
         System.out.print("Enter password: ");
         String password = sc.nextLine();
@@ -46,6 +59,12 @@ public class LoginView {
         System.out.println("\n=== Change Password ===");
         System.out.print("Enter user ID: ");
         String userID = sc.nextLine().trim();
+        
+        // Check if user ID exists first
+        if (!controller.userExists(userID)) {
+            System.out.println("Error: User ID not found. Please check your user ID and try again.");
+            return;
+        }
         
         System.out.print("Enter current password: ");
         String oldPassword = sc.nextLine();

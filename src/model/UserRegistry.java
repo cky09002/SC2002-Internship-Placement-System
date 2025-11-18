@@ -1,28 +1,32 @@
-package Assignment.src.model;
+package model;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Central database for all users in the system.
  * Uses the Singleton pattern - only one instance exists throughout the application.
- * Called from InternshipApp when loading users, and from controllers when looking up users.
+ * Manages in-memory user storage and retrieval.
+ * 
+ * Note: CSV persistence is handled by UserCsvHandler in utils/csv/ (MVC compliance).
+ * 
+ * @author NTU SC2002 Group
+ * @version 1.0
+ * @since 2025-11-16
  */
 public class UserRegistry {
+    /** Singleton instance of UserRegistry */
     private static UserRegistry instance;
+    /** Map of user IDs to User objects */
     private final Map<String,User> users = new HashMap<>();
     
+    /** Private constructor to enforce singleton pattern */
     private UserRegistry() {}
     
     /**
      * Get the single instance of UserRegistry.
      * Called from anywhere in the app that needs to access user data.
+     * @return the singleton UserRegistry instance
      */
     public static UserRegistry getInstance() {
         if (instance == null) {
@@ -34,6 +38,8 @@ public class UserRegistry {
     /**
      * Add a new user to the registry.
      * Called from InternshipApp when loading users from CSV files.
+     * @param user the user to register
+     * @return true if registration successful, false otherwise
      */
     public boolean register(User user){
         if(user == null || user.getUserID() == null) return false;
@@ -45,6 +51,8 @@ public class UserRegistry {
     /**
      * Find a user by their ID.
      * Called from LoginController during login and password changes.
+     * @param userID the user ID to search for
+     * @return the User object if found, null otherwise
      */
     public User findById(String userID){
         if (userID == null) return null;
@@ -54,6 +62,7 @@ public class UserRegistry {
     /**
      * Get all users in the system.
      * Used for clearing application references when reloading from CSV.
+     * @return collection of all users
      */
     public java.util.Collection<User> getAllUsers() {
         return new java.util.ArrayList<>(users.values());
@@ -62,6 +71,7 @@ public class UserRegistry {
     /**
      * Get all company representatives in the system.
      * Called from StaffController to show the list of company reps for approval/rejection.
+     * @return list of all company representatives
      */
     public java.util.List<CompanyRepresentative> getAllCompanyReps() {
         return users.values().stream()
@@ -70,90 +80,4 @@ public class UserRegistry {
                 .collect(java.util.stream.Collectors.toList());
     }
     
-    /**
-     * Save a newly registered company rep to the CSV file.
-     * Called from LoginController when a new company rep registers in-app.
-     */
-    public void saveCompanyRepToCsv(CompanyRepresentative compRep) {
-        try {
-            FileWriter writer = new FileWriter("sample_file/sample_company_representative_list.csv", true); // append mode
-            String status = compRep.getStatusStringForCsv();
-            writer.write(String.format("%s,%s,%s,%s,%s,%s,%s,%s\n",
-                compRep.getUserID(),
-                compRep.getName(),
-                compRep.getCompanyName(),
-                compRep.getDepartment(),
-                compRep.getPosition(),
-                compRep.getEmail(),
-                compRep.getPassword(),
-                status));
-            writer.close();
-        } catch (IOException e) {
-            // Log error - models should not have UI output
-            // Error will be handled by calling code (controller)
-            throw new RuntimeException("Error saving company representative to CSV: " + e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Update a company rep's approval status in the CSV file.
-     * Called from StaffController when staff approves or rejects a company rep account.
-     */
-    public void updateCompanyRepStatusInCsv(CompanyRepresentative compRep) {
-        String newLine = String.format("%s,%s,%s,%s,%s,%s,%s,%s", compRep.getUserID(), compRep.getName(),
-            compRep.getCompanyName(), compRep.getDepartment(), compRep.getPosition(),
-            compRep.getEmail(), compRep.getPassword(), compRep.getStatusStringForCsv());
-        updateCsvLine("sample_file/sample_company_representative_list.csv", compRep.getUserID(), newLine);
-    }
-    
-    private void updateCsvLine(String filename, String userID, String newLine) {
-        try {
-            List<String> lines = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                lines.add(reader.readLine()); // header
-                reader.lines().forEach(line -> lines.add(line.split(",")[0].equals(userID) ? newLine : line));
-            }
-            try (FileWriter writer = new FileWriter(filename)) {
-                for (String l : lines) writer.write(l + "\n");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error updating CSV: " + e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Save password changes to the appropriate CSV file.
-     * Called from LoginController after a user successfully changes their password.
-     */
-    public void savePasswordChangeToCsv(User user) {
-        String filename = user instanceof Student ? "sample_file/sample_student_list.csv" :
-                          user instanceof Staff ? "sample_file/sample_staff_list.csv" :
-                          user instanceof CompanyRepresentative ? "sample_file/sample_company_representative_list.csv" : null;
-        if (filename != null) updatePasswordInCsv(filename, user.getUserID(), user.getPassword());
-    }
-    
-    private void updatePasswordInCsv(String filename, String userID, String newPassword) {
-        try {
-            List<String> lines = new ArrayList<>();
-            String[] header = null;
-            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                header = reader.readLine().split(",");
-                int passwordCol = java.util.Arrays.asList(header).indexOf("Password");
-                lines.add(String.join(",", header));
-                reader.lines().forEach(line -> {
-                    String[] cols = line.split(",");
-                    if (cols.length > 0 && cols[0].equals(userID) && passwordCol >= 0 && passwordCol < cols.length) {
-                        cols[passwordCol] = newPassword;
-                        line = String.join(",", cols);
-                    }
-                    lines.add(line);
-                });
-            }
-            try (FileWriter writer = new FileWriter(filename)) {
-                for (String l : lines) writer.write(l + "\n");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error updating password in CSV: " + e.getMessage(), e);
-        }
-    }
 }
