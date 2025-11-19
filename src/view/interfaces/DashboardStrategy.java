@@ -1,4 +1,4 @@
-package view;
+package view.interfaces;
 
 /**
  * Strategy interface for different user dashboard behaviors.

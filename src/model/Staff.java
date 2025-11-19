@@ -72,7 +72,7 @@ public class Staff extends User {
      * @return StaffDashboardStrategy for this staff member
      */
     @Override
-    public view.DashboardStrategy createDashboardStrategy() {
+    public view.interfaces.DashboardStrategy createDashboardStrategy() {
         return new view.StaffDashboardStrategy(this);
     }
 }

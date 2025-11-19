@@ -1,5 +1,7 @@
 package view;
 
+import view.interfaces.DashboardStrategy;
+
 /**
  * Context class for dashboard strategy pattern.
  * Delegates dashboard execution to the appropriate strategy based on user type.

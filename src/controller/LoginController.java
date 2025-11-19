@@ -84,8 +84,14 @@ public class LoginController implements LoginControllerInterface {
         if (user == null) throw new IllegalArgumentException("Invalid user ID. Please try again.");
         if (!user.verifyPassword(password)) throw new IllegalArgumentException("Incorrect password. Please try again.");
         
-        if (user instanceof CompanyRepresentative && !((CompanyRepresentative) user).isApproved()) {
-            throw new IllegalArgumentException("Your account is pending approval. Please wait for Career Center Staff approval.");
+        if (user instanceof CompanyRepresentative) {
+            CompanyRepresentative compRep = (CompanyRepresentative) user;
+            if (compRep.getApprovalStatus() == constant.StaffApprovalStatus.REJECTED) {
+                throw new IllegalArgumentException("Your account has been rejected. Please contact Career Center Staff for assistance.");
+            }
+            if (!compRep.isApproved()) {
+                throw new IllegalArgumentException("Your account is pending approval. Please wait for Career Center Staff approval.");
+            }
         }
         user.setLoggedIn(true);
         return user;

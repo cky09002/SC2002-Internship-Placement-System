@@ -4,6 +4,7 @@ import model.*;
 import constant.ApplicationStatus;
 import utils.csv.*;
 import controller.interfaces.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,9 @@ public class ApplicationController implements ApplicationControllerInterface {
     /**
      * Creates an application for a student to a specific internship.
      * Students can only select internships that are visible to them (already filtered by major, level, and visibility).
+     * Enforces the maximum application limit (excluding withdrawn applications).
+     * Prevents duplicate applications to the same internship.
+     * Prevents new applications if student already has an accepted placement.
      * 
      * @param internshipID The ID of the internship to apply to
      * @param student The student submitting the application
@@ -79,7 +83,43 @@ public class ApplicationController implements ApplicationControllerInterface {
         loadApplicationsFromCsv(internshipControllerParam);
         
         Internship internship = internshipReader.findInternship(internshipID);
-        Application app = student.submitApplication(internship);
+        
+        // Check if student has already accepted a placement
+        boolean hasAcceptedPlacement = student.getApplications().stream()
+                .anyMatch(a -> a.getStatus() == ApplicationStatus.ACCEPTED);
+        
+        if (hasAcceptedPlacement) {
+            throw new IllegalArgumentException("You have already accepted a placement and cannot apply to other internships.");
+        }
+        
+        // Check if student has already applied to this internship
+        boolean alreadyApplied = student.getApplications().stream()
+                .anyMatch(a -> a.getInternship().getID() == internship.getID());
+        
+        if (alreadyApplied) {
+            throw new IllegalArgumentException("You have already applied to this internship.");
+        }
+        
+        // Enforce per-student application limit (exclude only WITHDRAWN applications)
+        long activeApplications = student.getApplications().stream()
+                .filter(a -> a.getStatus() != ApplicationStatus.WITHDRAWN)
+                .count();
+        
+        if (activeApplications >= Student.MAX_APPLICATIONS) {
+            throw new IllegalArgumentException("Maximum of " + Student.MAX_APPLICATIONS + " applications allowed.");
+        }
+
+        // Create the application object and pass it to associated internship
+        Application app = new Application(
+                internship,
+                student,
+                LocalDateTime.now()
+        );
+        internship.addApplication(app);
+
+        // Also store a reference locally
+        student.getApplications().add(app);
+        
         csvHandler.saveToCsv(app);
         return app;
     }
@@ -211,15 +251,16 @@ public class ApplicationController implements ApplicationControllerInterface {
     public void withdrawApplication(int applicationID, Student student, String reason) {
         Application app = findApplicationByID(applicationID, student);
         if (reason != null && !reason.trim().isEmpty()) {
-            student.withdrawApplication(app, reason);
+            app.requestWithdrawal(reason);
         } else {
-            student.withdrawApplication(app);
+            app.requestWithdrawal((String) null);
         }
         csvHandler.saveToCsv(app);
     }
     
     /**
      * Accepts a successful application, confirming the student's placement.
+     * This withdraws all other applications and updates the internship's filled slots.
      * 
      * @param applicationID The ID of the application to accept
      * @param student The student accepting the application
@@ -228,7 +269,23 @@ public class ApplicationController implements ApplicationControllerInterface {
     @Override
     public void acceptApplication(int applicationID, Student student) {
         Application app = findApplicationByID(applicationID, student);
-        student.acceptApplication(app);
+        
+        // Check that chosen application is successful
+        if (app.getStatus() != ApplicationStatus.SUCCESSFUL) {
+            throw new IllegalArgumentException("Application is " + app.getStatus() + ", needs to be " + ApplicationStatus.SUCCESSFUL + " to be accepted.");
+        }
+
+        // Update status to ACCEPTED when student confirms placement
+        app.setStatus(ApplicationStatus.ACCEPTED);
+        
+        // Withdraw all other applications
+        student.getApplications().stream()
+                .filter(a -> a != app)
+                .forEach(a -> a.setStatus(ApplicationStatus.WITHDRAWN));
+        
+        // Update filled slots in internship
+        app.getInternship().confirmPlacement();
+        
         csvHandler.saveToCsv(app);
         internshipWriter.saveInternship(app.getInternship());
     }

@@ -2,6 +2,7 @@ package view;
 
 import controller.StaffController;
 import model.Staff;
+import view.interfaces.DashboardStrategy;
 
 /**
  * Concrete strategy for staff dashboard.

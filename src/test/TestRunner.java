@@ -396,12 +396,19 @@ public class TestRunner {
             Internship internship2 = new Internship("Internship 2", "Desc", "Basic", "CSC", 
                 LocalDate.now(), LocalDate.now().plusDays(30), "Company", rep, 5);
             
-            Application app1 = student.submitApplication(internship1);
-            Application app2 = student.submitApplication(internship2);
+            // Create applications directly (Anemic Domain Model - business logic in controller)
+            Application app1 = new Application(internship1, student, LocalDateTime.now());
+            Application app2 = new Application(internship2, student, LocalDateTime.now());
+            internship1.addApplication(app1);
+            internship2.addApplication(app2);
+            student.getApplications().add(app1);
+            student.getApplications().add(app2);
             
             if (student.getApplications().size() == 2) {
                 app1.setStatus(ApplicationStatus.SUCCESSFUL);
-                student.acceptApplication(app1);
+                // Use ApplicationController for business logic
+                ApplicationController appController = new ApplicationController();
+                appController.acceptApplication(app1.getId(), student);
                 if (app2.getStatus() == ApplicationStatus.WITHDRAWN && app1.getStatus() == ApplicationStatus.ACCEPTED) {
                     passed("Single placement acceptance works - accepting one application withdraws others");
                 } else {
@@ -509,7 +516,10 @@ public class TestRunner {
             Internship internship = new Internship("Test", "Desc", "Basic", "CSC", 
                 LocalDate.now(), LocalDate.now().plusDays(30), "Company", rep, 5);
             
-            Application app = student.submitApplication(internship);
+            // Create application directly (Anemic Domain Model)
+            Application app = new Application(internship, student, LocalDateTime.now());
+            internship.addApplication(app);
+            student.getApplications().add(app);
             app.setStatus(ApplicationStatus.ACCEPTED);
             if (app.getStatus() == ApplicationStatus.ACCEPTED) {
                 passed("Application can be accepted and status updated correctly");
@@ -531,7 +541,10 @@ public class TestRunner {
             Internship internship = new Internship("Test", "Desc", "Basic", "CSC", 
                 LocalDate.now(), LocalDate.now().plusDays(30), "Company", rep, 5);
             
-            Application app = student.submitApplication(internship);
+            // Create application directly (Anemic Domain Model)
+            Application app = new Application(internship, student, LocalDateTime.now());
+            internship.addApplication(app);
+            student.getApplications().add(app);
             app.setStatus(ApplicationStatus.ACCEPTED);
             if (app.getStatus() == ApplicationStatus.ACCEPTED) {
                 passed("Placement confirmation status can be set and persists");

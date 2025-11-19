@@ -152,5 +152,5 @@ public abstract class User {
      * 
      * @return DashboardStrategy for this user type
      */
-    public abstract view.DashboardStrategy createDashboardStrategy();
+    public abstract view.interfaces.DashboardStrategy createDashboardStrategy();
 }

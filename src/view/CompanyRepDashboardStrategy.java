@@ -2,6 +2,7 @@ package view;
 
 import controller.CompanyRepresentativeController;
 import model.CompanyRepresentative;
+import view.interfaces.DashboardStrategy;
 
 /**
  * Concrete strategy for company representative dashboard.

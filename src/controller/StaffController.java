@@ -74,13 +74,13 @@ public class StaffController extends BaseUserController {
     }
     
     /**
-     * Gets pending company representatives awaiting approval.
+     * Gets all company representatives with their approval status.
+     * Shows PENDING (awaiting approval), APPROVED, and REJECTED status.
      * 
-     * @return List of formatted company representative strings with PENDING status
+     * @return List of formatted company representative strings with their status
      */
     public List<String> getPendingCompanyReps() {
         return loginController.getAllCompanyReps().stream()
-                .filter(rep -> rep.getApprovalStatus() == constant.StaffApprovalStatus.PENDING)
                 .map(rep -> utils.formatter.UserFormatter.formatProfile(rep))
                 .collect(Collectors.toList());
     }

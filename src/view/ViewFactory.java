@@ -1,6 +1,7 @@
 package view;
 
 import model.*;
+import view.interfaces.DashboardStrategy;
 
 /**
  * Factory class for creating dashboard strategies based on user type.

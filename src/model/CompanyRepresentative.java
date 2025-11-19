@@ -167,7 +167,7 @@ public class CompanyRepresentative extends User {
      * @return CompanyRepDashboardStrategy for this company representative
      */
     @Override
-    public view.DashboardStrategy createDashboardStrategy() {
+    public view.interfaces.DashboardStrategy createDashboardStrategy() {
         return new view.CompanyRepDashboardStrategy(this);
     }
 }

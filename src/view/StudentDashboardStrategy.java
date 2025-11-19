@@ -2,6 +2,7 @@ package view;
 
 import controller.StudentController;
 import model.Student;
+import view.interfaces.DashboardStrategy;
 
 /**
  * Concrete strategy for student dashboard.
